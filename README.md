@@ -15,6 +15,16 @@ FancyDumpVar (FDV) ist eine leistungsstarke PHP-Bibliothek für Entwickler, die 
 
 ---
 
+## 📸 Screenshot
+
+Hier siehst du FancyDumpVar in Aktion:
+
+![FancyDumpVar Screenshot](https://teitge.de/data/images/fdv/FancyDumpVar.jpg)
+
+
+---
+
+
 ## 🛠️ Installation
 
 ### Composer (folgt in Kürze)
