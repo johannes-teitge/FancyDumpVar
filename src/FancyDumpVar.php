@@ -1135,7 +1135,7 @@ protected static function getAssetVersion($filePath) {
                 ksort($var);
             }
             $output = '<div class="dump-toggler-wrapper" >' . $indent . '<span class="dump-toggler" id="btn-' . $id . '" onclick="toggleElement(\'' . $id . '\')">[+]</span>';
-            $output .= '<span class="dump-array">Array (' . count($var) . ')</span>';
+            $output .= '<span class="dump-array" onclick="toggleElement(\'' . $id . '\')">Array (' . count($var) . ')</span>';
 
             $output .= '<div class="dump-content-level-'.$level.' dump-content hidden" id="' . $id . '">';
             foreach ($var as $key => $value) {
@@ -1186,7 +1186,7 @@ protected static function getAssetVersion($filePath) {
 
                 $output = '<div class="dump-toggler-wrapper">';
                 $output .= '<span class="dump-toggler" id="btn-' . $id . '" onclick="toggleElement(\'' . $id . '\')">[+]</span>';
-                $output .= '<span class="dump-object">Object of <span class="fds_classname">' . htmlspecialchars($className) . '</span></span>';
+                $output .= '<span class="dump-object" onclick="toggleElement(\'' . $id . '\')">Object of <span class="fds_classname">' . htmlspecialchars($className) . '</span></span>';
                 $output .= '<div class="dump-content hidden" id="' . $id . '">';
 
                 // Array zur Speicherung der bereits verarbeiteten Property-Namen, um doppelte Einträge zu vermeiden

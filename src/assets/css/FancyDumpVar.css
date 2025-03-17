@@ -19,7 +19,7 @@
 .dump-float { color: #006e1b; font-weight: bold; }
 .dump-string { color: #0061b6; font-weight: bold; }
 .dump-null { color: #7f8c8d; font-weight: bold; }
-.dump-array, .dump-object { color: #2c3e50; font-weight: bold; }
+.dump-array, .dump-object { color: #2c3e50; font-weight: bold; cursor: pointer; }
 .dump-key { color: #003f68cd; }
 
 /* Stile für Sichtbarkeit von Properties und Methoden */
@@ -107,7 +107,6 @@
 }
 
 .dump-toggler-wrapper:hover {
-    cursor: pointer !important;
     background: linear-gradient(to bottom, #ffffff00,  #ebebeb64, #b7b7b739); 
   }
 
