@@ -1,0 +1,472 @@
+/* Dump-Wrapper mit Schatten */
+.fds-dump-wrapper {
+    border: 1px solid #dddddd;  /* Heller Rand für Light-Design */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background: #f5f5f5; /* Heller Hintergrund für den Container */
+    overflow: hidden;
+    margin-bottom: 10px;
+    padding: 0;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Stile für unterschiedliche Datentypen */
+.bool-true { color: #990d14c1; font-weight: bold; } /* Dunkelgrau für true */
+.bool-false { color: #457d0ad0; font-weight: bold; } /* Etwas heller für false */
+.dump-int { color: #917600d2; font-weight: bold; } /* Grauton für Integer */
+.dump-float { color: #929500; font-weight: bold; } /* Hellerer Grauton für Fließkommazahlen */
+.dump-string { color: #004e97dc; font-weight: bold; } /* Noch hellerer Grauton für Strings */
+.dump-null { color: #25426f; font-weight: bold; } /* Grauton für null */
+.dump-array, .dump-object { color: #25426f; font-weight: bold; } /* Sehr heller Grauton für Arrays/Objekte */
+.dump-key { font-weight: bold; color: #3d3d3d; } /* Hellgrau für Schlüssel */
+
+/* Stile für Sichtbarkeit von Properties und Methoden */
+.fds_propname { font-weight: bold; margin-left: 5px; }
+.fds_propname_visibility.public { color: #4a4a4a; } /* Hellgrau für public */
+.fds_propname_visibility.protected { color: #888888; } /* Noch hellerer Grauton für protected */
+.fds_propname_visibility.private { color: #999999aa; } /* Noch hellerer Grauton für private */
+
+.fds_methodname { font-weight: bold; margin-left: 5px; }
+.fds_method_visibility.public { color: #4a4a4a } /* Hellgrau für public */
+.fds_method_visibility.protected { color: #888888; } /* Noch hellerer Grauton für protected */
+.fds_method_visibility.private { color: #999999aa; } /* Noch hellerer Grauton für private */
+
+.fds_method_params { font-style: italic; color: #aaaaaa; } /* Hellerer Grauton für Parameter */
+.fds_param_name { color: #bbbbbb; }
+.fds_param_type { color: #aaaaaa; }
+.fds_param_default { color: #777777; font-weight: bold; }        
+
+.fds_classname { font-weight: bold; color: #666666; } /* Grauton für Klassennamen */
+
+/* Struktur-Indentierung */
+.dump-container {
+    font-family: 'Courier New', monospace !important;
+    background: linear-gradient(to bottom, #fdfdfd, #f0f0f0);
+    padding: 10px;
+    border-radius: 5px;
+    margin: 0;
+    font-size: 0.90rem !important;
+    line-height: 1.1rem !important;
+}
+.dump-content {
+    margin-left: 12px;
+    padding-left: 5px;
+    border-left: 2px solid rgba(200, 200, 200, 0.5);
+}
+
+.dump-content-level-1 {
+    border-left: 2px solid rgba(200, 200, 200, 0.7);
+}
+
+.dump-content-level-2 {
+    border-left: 2px solid rgba(200, 200, 200, 0.6);
+}
+
+.dump-content-level-3 {
+    border-left: 2px solid rgba(200, 200, 200, 0.4);
+}
+
+.dump-content-level-4 {
+    border-left: 2px solid rgba(200, 200, 200, 0.3);
+}
+
+.var-wrapper {
+    margin-bottom: 10px;
+    padding: 0 0;
+    background-color: #ffffff;
+    border: 1px solid #e5e5e5;
+    border-left: 6px solid #cccccc;
+    border-radius: 8px;
+    padding: 4px 4px 4px 6px;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.var-wrapper:hover {
+    border: 1px solid #cccccc;
+    border-left: 6px solid #bbbbbb;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Toggle-Funktion */
+.dump-toggler-wrapper .dump-toggler-wrapper {
+    margin-left: 10px;
+}
+
+.dump-toggler-wrapper {
+
+    padding-top: 3px;
+    border-radius: 6px;
+    border-top: 4px solid #ffffff00;
+    border-bottom: 4px solid #ffffff00;
+    border-left: 2px solid #ffffff00;    
+}
+
+.dump-toggler-wrapper:hover {
+}
+
+.dump-toggler {
+    cursor: pointer;
+    color: #7a7a7ac1;
+    font-weight: bold;
+    margin-right: 5px;
+    display: inline-block;
+    margin-bottom: 5px;
+}
+
+.dump-toggler:hover {
+    color: #202020;
+}    
+
+.hidden {
+    display: none;
+}
+
+.varName {
+    font-weight: bold;
+}
+
+.varTimeInfo {
+    font-size: 0.8rem;
+    color: rgb(160, 160, 160);
+}
+
+.fds_propname_visibility {
+    font-weight: bold;
+}
+
+/* Markierte Suchtreffer */
+.dump-container mark {
+    background-color: #cccccc;
+    color: black;
+    padding: 2px;
+    font-weight: bold;
+}
+
+mark.current {
+    background: #bbbbbb;
+}
+
+/* Container für die Steuerungselemente */
+.dump-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 10px 4px 4px;
+    background: #f1f1f1;
+    border-bottom: 1px solid #cccccc;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+/* Suchfeld */
+.dump-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Expand / Close Buttons */
+.dump-tree {
+    display: flex;
+    gap: 10px;
+}
+
+/* Allgemeine Button-Stile */
+.dump-btn {
+    padding: 3px 8px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #555555;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.dump-btn:hover {
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Individuelle Button-Farben */
+.expand {
+    background-color: #dddddd;
+}
+
+.expand:hover {
+    background-color: #cccccc;
+}
+
+.fdv-close {
+    background-color: #bbbbbb;
+}
+
+.fdv-close:hover {
+    background-color: #aaaaaa;
+}
+
+.help {
+    background-color: #dddddd;
+}
+
+.help:hover {
+    background-color: #cccccc;
+}
+
+/* Klick-Effekt für Buttons */
+.dump-btn:active {
+    transform: scale(0.90);
+}
+
+/* Dump-Wrapper mit Schatten */
+.dump-wrapper {
+    border: 1px solid #cccccc;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background: #f9f9f9;
+    overflow: hidden;
+    margin-bottom: 10px;
+    padding: 0;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Titel-Bar mit Gradient & Hover-Effekt */
+.dump-title-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 15px;
+    background: linear-gradient(90deg, #bbbbbb, #cccccc);
+    color: #333333;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s ease-in-out, padding 0.2s ease-in-out;
+}
+
+.dump-title-bar:hover {
+}
+
+.dump-title-bar.open {
+}
+
+/* Titel (kleiner gemacht für bessere Proportionen) */
+.dump-title {
+    font-size: 0.9rem;
+}
+
+/* Plus-/Minus-Symbol mit verbesserter Optik */
+.dump-toggler-symbol {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    color: #777777;
+    font-size: 18px;
+    font-weight: bold;
+    font-family: Arial, sans-serif;
+    transition: transform 0.3s ease-in-out, color 0.3s ease-in-out;
+    user-select: none;
+    border-radius: 16px;
+    height: 20px;
+    width: 20px;
+    font-family: "Courier New", Consolas, monospace;
+    font-weight: 800;
+}
+
+/* Öffnungsanimation für das Symbol */
+.dump-title-bar.open .dump-toggler-symbol.open {
+    background: #cccccc;
+    transform: rotate(540deg);
+}
+
+/* Responsives Design für kleine Bildschirme */
+@media (max-width: 600px) {
+    .dump-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .dump-search, .dump-tree {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .dump-btn {
+        width: 100%;
+    }
+}
+
+.hidden {
+    display: none;
+}
+
+/* Such-Wrapper */
+.dump-search-wrapper {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 400px;
+    border: 1px solid #cccccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    padding-right: 5px;
+}
+
+.dump-input {
+    width: 100% !important;
+    padding: 0 10px 0 10px !important;
+    font-size: 14px !important;
+    border: 0 !important;
+    background: transparent;
+    outline: none;
+}
+
+.dump-input:focus {
+    border: 1px solid #bbbbbb;
+}
+
+.dump-search-wrapper input.dump-input {
+    height: initial !important;
+    border-radius: 4px;
+    padding: 0 10px 0 10px !important;
+    min-height: 30px !important;
+}
+
+.dump-search-wrapper input.dump-input:focus {
+    border: none !important;
+    outline: none !important;
+    background: transparent;
+}
+
+/* Visuellen Fokus beim Tastaturfokus hinzufügen */
+.dump-search-wrapper input.dump-input:focus-visible {
+    border: 2px solid #bbbbbb;
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+}
+
+.toggle-buttons {
+    display: flex;
+    gap: 1px;
+    margin-left: 10px;
+}
+
+.toggle-btn {
+    background: rgba(255, 255, 255, 0);
+    border: 2px solid rgba(255, 255, 255, 0);
+    font-size: 18px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin: 2px 0px;
+    border-radius: 5px;
+    width: 36px;
+    height: 26px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+}
+
+.fdv-clear img {
+    padding: 8px;
+    width: 36px;
+}
+
+.toggle-btn img {
+    object-fit: contain;
+}
+
+.toggle-btn:hover {
+    background-color: #dddddd;
+    border: 2px solid #bbbbbb;
+}
+
+.toggle-btn.active {
+    background: rgba(204, 235, 255, 0.671);
+    border: 2px solid #888888;
+}
+
+.clear {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 5px;
+    transition: background-color 0.3s;
+    border: 2px solid rgba(255, 255, 255, 0);
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 34px;
+    height: 34px;
+    margin-right: 5px;
+}
+
+.clear img {
+    object-fit: contain;
+}
+
+.clear:hover {
+    background-color: rgb(220, 220, 220);
+    border: 2px solid rgb(164, 0, 0);
+}
+
+.varInfo {
+    gap: 14px;
+    display: inline-flex;
+    font-size: 0.8em;
+    background-color: rgba(200, 200, 200, 0.2);
+    color: rgb(83, 83, 83);
+    border-radius: 8px;
+    padding: 2px;
+}
+
+.varInfoItemValue {
+    font-weight: bold;
+    color: rgba(0, 0, 0, 0.873);
+}
+
+.varName-toggle-btn {
+    font-size: 0.9em;
+    text-decoration: none;
+    font-weight: normal;
+}
+
+/* Container für den varName-Text und Button */
+.varName {
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    gap: 2px;
+}
+
+/* Stil für den Button */
+.info-icon-btn {
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: #a0a0a077;
+    width: 15px;
+    height: 15px;
+}
+
+.info-icon-btn:hover {
+    color: #777777;
+}
+
+/* Stil für den aktiven Zustand */
+.info-icon-btn.active {
+    color: #777777;
+}
+
+/* Stil für das SVG-Bild im Button */
+.info-icon {
+    fill: currentColor;
+}
