@@ -1,8 +1,0 @@
-        $maxExecutionTime = self::getOption('maxExecutionTime');
-
-        sortPropertiesAndMethods
-
-        'TimeInfoFormat' => "h:i:sa ",    
-        'DateInfoFormat' => "d.m.Y ", 
-
-        self::getOption('Title');
