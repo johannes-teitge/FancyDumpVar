@@ -1,4 +1,5 @@
 <?php
+namespace FancyDumpVar;
 
 /**
  * FancyDumpVar
@@ -31,7 +32,7 @@
  */
 
 
-namespace FancyDumpVar;
+
 
 
 // Konfiguriere die Basis-URL der Anwendung (kann auch aus einer Konfigurationsdatei kommen)
@@ -45,6 +46,20 @@ function getBaseUrl() {
     
     // Erstelle die Basis-URL
     return $protocol . '://' . $host . $rootPath;
+}
+
+if (!function_exists('_t')) {
+    /**
+     * Globale Übersetzungsfunktion mit Fallback.
+     *
+     * @param string $key Der Schlüssel der Übersetzung.
+     * @param string|null $default Fallback-Text, falls keine Übersetzung gefunden wird.
+     * @param array $placeholders Platzhalter für dynamische Werte.
+     * @return string Die übersetzte Zeichenkette oder der Fallback-Text.
+     */
+    function _t($key, $default = null, $placeholders = []) {
+        return FancyDumpVar::translate($key, $default, $placeholders);
+    }
 }
 
 
@@ -181,6 +196,12 @@ class FancyDumpVar {
 
     // Stoppuhr-Instanz
     protected static $stopwatch;    
+	
+    // Definiere die Standard-Sprache
+    protected static $currentLanguage = 'en';
+
+    // Definiere das Übersetzungs-Array
+    protected static $translations = [];	
 
     // Array zum Speichern der TODO-Elemente
     // Feste TODO-Liste als Array
@@ -256,7 +277,7 @@ class FancyDumpVar {
         'ShowTimeInfo' => false, 
         'TimeInfoFormat' => "h:i:sa ",    
         'DateInfoFormat' => "d.m.Y ", 
-        'OverwriteStackVars' => false, 
+        'OverwriteStackVars' => true, 
         'Title' => '',
         'customCssFile' => '', 
 
@@ -264,16 +285,6 @@ class FancyDumpVar {
             'iconInfo' => 'path/to/icon_info.svg', 
             'iconError' => 'path/to/icon_error.svg'
         ],
-        'translations' => [         // Beispiel für Übersetzungen
-            'en' => [
-                'infoMessage' => 'Info Message',
-                'errorMessage' => 'Error Message',
-            ],
-            'de' => [
-                'infoMessage' => 'Informationsnachricht',
-                'errorMessage' => 'Fehlermeldung',
-            ]
-        ]
     ];
 
     /**
@@ -310,6 +321,86 @@ class FancyDumpVar {
     public static function getOptions() {
         return self::$options;  // Gibt das gesamte Optionen-Array zurück
     }    
+
+
+
+
+    /**
+     * Lädt die Übersetzungen aus einer JSON-Datei oder PHP-Array.
+     * Die Sprachdateien müssen im Format `translations/de.json` oder `translations/en.php` vorliegen.
+     */
+	public static function loadTranslations() {
+		$language = self::getOption('language'); // Holt die Sprache aus den Optionen
+		$filePathJson = __DIR__ . "/translations/{$language}.json";
+		$filePathPhp  = __DIR__ . "/translations/{$language}.php";
+
+		if (file_exists($filePathJson)) {
+			self::$translations = json_decode(file_get_contents($filePathJson), true);
+		} elseif (file_exists($filePathPhp)) {
+			self::$translations = include $filePathPhp;
+		} else {
+			self::$translations = [];
+		}
+	}
+
+    /**
+     * Setzt die Sprache für Übersetzungen.
+     * @param string $language Sprachcode (z.B. 'de', 'en', 'fr')
+     */
+    public static function setLanguage($language) {
+        self::$currentLanguage = $language;
+        self::loadTranslations($language);
+    }
+
+/**
+ * Holt eine Übersetzung anhand eines Schlüssels.
+ * Falls keine Übersetzung gefunden wird, wird der Fallback-Text oder der Schlüssel selbst zurückgegeben.
+ *
+ * @param string $key Der Schlüssel der Übersetzung.
+ * @param string|null $default Fallback-Text, falls keine Übersetzung gefunden wird.
+ * @param array $placeholders Platzhalter für dynamische Werte.
+ * @return string Die übersetzte Zeichenkette oder der Fallback-Text.
+ */
+public static function translate($key, $default = null, $placeholders = []) {
+    // Zugriff auf die Übersetzungen und Überprüfung, ob ein Eintrag existiert
+    if (isset(self::$translations[$key])) {
+        $translation = self::$translations[$key];
+    } else {
+        // Wenn kein Übersetzungseintrag existiert, prüfe, ob ein Default-Wert angegeben wurde
+        if ($default !== null) {
+            $translation = $default;
+        } else {
+            // Wenn kein Default-Wert angegeben wurde, verwende den Key als Fallback
+            $translation = $key;
+        }
+    }
+
+    // Überprüfung, ob der zurückgegebene Wert ein String ist
+    if (!is_string($translation)) {
+        error_log("⚠ Fehler: Übersetzung für '{$key}' ist kein String! Fallback wird genutzt.");
+        $translation = is_string($default) ? $default : (is_string($key) ? $key : '[Übersetzungsfehler]');
+    }
+
+    // Stelle sicher, dass $placeholders ein Array ist
+    if (!is_array($placeholders)) {
+        error_log("⚠ Fehler: Platzhalter für '{$key}' sind kein Array.");
+        $placeholders = [];
+    }
+
+    // Ersetze Platzhalter, falls vorhanden
+    foreach ($placeholders as $placeholder => $value) {
+        $translation = str_replace("{{$placeholder}}", $value, $translation);
+    }
+
+    return $translation;
+}
+
+
+
+
+
+
+
 
 
 
@@ -357,7 +448,7 @@ class FancyDumpVar {
             '<h3 style="margin-bottom:0;padding-bottom:0">'. htmlspecialchars($todo['title']) . '</h3>'.
             '<p style="margin: 5px 0px 5px 0;padding-bottom:0">'.
             '<small><strong>Prio: </strong>'. htmlspecialchars($todo['priority']) .'<br>'. 
-            '<strong>Timestamp: </strong>'. htmlspecialchars($todo['timestamp']) .'</small></p><p style="margin: 5px 0px 5px 0;padding-bottom:0">'.  
+            '<strong>'._t('Timestamp').': </strong>'. htmlspecialchars($todo['timestamp']) .'</small></p><p style="margin: 5px 0px 5px 0;padding-bottom:0">'.  
             htmlspecialchars($todo['description']) . '</p>';          
 
 
@@ -398,37 +489,37 @@ class FancyDumpVar {
 
 
 
-/**
- * Berechnet die Größe einer Variablen in Bytes (serialisiert)
- * Verhindert Fehler, die durch nicht serialisierbare oder anonyme Variablen entstehen.
- *
- * @param mixed $var Die zu überprüfende und zu serialisierende Variable.
- * @return int Die Größe der serialisierten Variable in Bytes.
- */
-public static function calculateSize($var) {
-    try {
-        // Wenn es sich um ein Objekt handelt, prüfe, ob es serialisierbar ist
-        if (is_object($var)) {
-            // Überprüfe, ob das Objekt eine __serialize-Methode hat
-            if (method_exists($var, '__serialize')) {
-                // Benutze die benutzerdefinierte Serialize-Methode
-                $serialized = serialize($var);
-            } else {
-                // Benutze den Standard-Serialisierungsmechanismus, falls __serialize nicht existiert
-                $serialized = serialize($var);
-            }
-            return strlen($serialized);  // Gibt die Größe der serialisierten Variable in Bytes zurück
-        }
+	/**
+	 * Berechnet die Größe einer Variablen in Bytes (serialisiert)
+	 * Verhindert Fehler, die durch nicht serialisierbare oder anonyme Variablen entstehen.
+	 *
+	 * @param mixed $var Die zu überprüfende und zu serialisierende Variable.
+	 * @return int Die Größe der serialisierten Variable in Bytes.
+	 */
+	public static function calculateSize($var) {
+		try {
+			// Wenn es sich um ein Objekt handelt, prüfe, ob es serialisierbar ist
+			if (is_object($var)) {
+				// Überprüfe, ob das Objekt eine __serialize-Methode hat
+				if (method_exists($var, '__serialize')) {
+					// Benutze die benutzerdefinierte Serialize-Methode
+					$serialized = serialize($var);
+				} else {
+					// Benutze den Standard-Serialisierungsmechanismus, falls __serialize nicht existiert
+					$serialized = serialize($var);
+				}
+				return strlen($serialized);  // Gibt die Größe der serialisierten Variable in Bytes zurück
+			}
 
-        // Wenn es kein Objekt ist, versuche die Variable zu serialisieren
-        $serialized = serialize($var);
-        return strlen($serialized);  // Gibt die Größe der serialisierten Variable in Bytes zurück
-    } catch (Exception $e) {
-        // Falls ein Fehler beim Serialisieren auftritt, gib eine Fehlermeldung aus
-        error_log("Fehler beim Serialisieren der Variable: " . $e->getMessage());
-        return -1; // Setze die Größe auf 0, wenn sie nicht serialisierbar ist
-    }
-}
+			// Wenn es kein Objekt ist, versuche die Variable zu serialisieren
+			$serialized = serialize($var);
+			return strlen($serialized);  // Gibt die Größe der serialisierten Variable in Bytes zurück
+		} catch (Exception $e) {
+			// Falls ein Fehler beim Serialisieren auftritt, gib eine Fehlermeldung aus
+			error_log("Fehler beim Serialisieren der Variable: " . $e->getMessage());
+			return -1; // Setze die Größe auf 0, wenn sie nicht serialisierbar ist
+		}
+	}
 
 
 
@@ -631,34 +722,53 @@ public static function calculateSize($var) {
 
 
 
-/**
- * Überprüft den Variablennamen und stellt sicher, dass er korrekt ist.
- * Wenn der Name mit '$' beginnt, wird er unverändert zurückgegeben,
- * andernfalls wird ein alternativer Name generiert.
- *
- * @param string $varName Der Variablenname
- * @return string Der bereinigte und überprüfte Variablenname
- */
-protected static function checkVarName($varName) {
-    // Prüfen, ob der Variablenname mit einem '$' beginnt
-    if (strpos($varName, '$') === 0) {
-        // Wenn der Name mit '$' beginnt, gebe ihn unverändert zurück
-        return $varName;
-    }
+	/**
+	 * Überprüft den Variablennamen und stellt sicher, dass er korrekt ist.
+	 * Wenn der Name mit '$' beginnt, wird er unverändert zurückgegeben,
+	 * andernfalls wird ein alternativer Name generiert.
+	 *
+	 * @param string $varName Der Variablenname
+	 * @return string Der bereinigte und überprüfte Variablenname
+	 */
+	protected static function checkVarName($varName) {
+		// Prüfen, ob der Variablenname mit einem '$' beginnt
+		if (strpos($varName, '$') === 0) {
+			// Wenn der Name mit '$' beginnt, gebe ihn unverändert zurück
+			return $varName;
+		}
 
 
-    // Prüfen, ob der Name eine Konstante ist
-    if (defined($varName)) {
-        return $varName; // Wenn es eine Konstante ist, wird der Name unverändert zurückgegeben
-    }    
+		// Prüfen, ob der Name eine Konstante ist
+		if (defined($varName)) {
+			return $varName; // Wenn es eine Konstante ist, wird der Name unverändert zurückgegeben
+		}    
 
-    // Wenn der Name nicht mit '$' beginnt, erstelle einen alternativen Namen
-    return 'Wert_' . (count(self::$stack) + 1); // Fallback-Name
-}
+		// Wenn der Name nicht mit '$' beginnt, erstelle einen alternativen Namen
+		return 'Wert_' . (count(self::$stack) + 1); // Fallback-Name
+	}
 
 
+    /**
+     * Ermittelt eine eindeutige Identifikationsnummer für verschiedene Datentypen.
+     *
+     * @param mixed $var Die Variable, für die eine Identifikationsnummer benötigt wird.
+     * @return string Die eindeutige Identifikationsnummer basierend auf dem Typ und Inhalt der Variable.
+     *                Für Objekte wird die spl_object_id verwendet, für Arrays ein md5-Hash ihrer Serialisierung,
+     *                für Ressourcen ihre numerische ID und für primitive Typen die ID eines temporären Objekts.
+     */
+	public static function getMemoryIdentifier($var) {
+		if (is_object($var)) {
+			return 'OBJ-' . spl_object_id($var);  // Eindeutige ID für Objekte
+		} elseif (is_array($var)) {
+			return 'ARR-' . md5(serialize($var)); // Hash für Arrays, um Veränderungen zu erkennen
+		} elseif (is_resource($var)) {
+			return 'RES-' . intval($var); // Ressourcen haben eine numerische ID
+		} else {
+			// Trick für Primitive: Ein Objekt erstellen, die ID davon nehmen
+			return 'PRIM-' . spl_object_id((object)$var);
+		}
+	}
 
-    
 
     /**
      * Fügt Variablen zum Stack hinzu und überschreibt sie ggf.
@@ -667,14 +777,9 @@ protected static function checkVarName($varName) {
      */
     public static function dump(...$vars) {
 
-
-
-
         // Holt die tatsächlichen Variablennamen aus dem aufrufenden Code
         $varNames = self::getVariableNames();
 
-  
-    
         foreach ($vars as $index => $var) {
             // Bereinige den Variablennamen
 
@@ -684,22 +789,63 @@ protected static function checkVarName($varName) {
         //    $varName = preg_replace('/[^a-zA-Z0-9_]/', '_', $varName); // Entferne Sonderzeichen
 
             $varName = self::checkVarName($varName);
+			
+			// Prüft, ob es sich um ein Objekt handelt und holt eine eindeutige ID bzw. "Speicheradresse"
+			$memoryAddress = self::getMemoryIdentifier($var);		
         
             // Rest des Codes bleibt gleich
             $updated = false;
         
             $elapsedTime = self::getElapsedTime();
+
+            $varType = gettype($var);         
+       //     $varType = '';
+			
+            $currentVersion = 1;  // Standard-Version für neue Variablen
+
+			// Überprüfe, ob es bereits Versionen dieser Variable gibt
+			$existingVersions = array_filter(self::$stack, function ($entry) use ($varName) {
+				return $entry['name'] === $varName;
+			});
+
+			if (!empty($existingVersions)) {
+				// Die höchste vorhandene Version suchen
+                $existingVersionNumbers = array_column($existingVersions, 'version');
+				$maxVersion = !empty($existingVersionNumbers) ? max($existingVersionNumbers) : 0;
+				$currentVersion = $maxVersion + 1; // Neue Version +1
+			}			
         
+			$history = [];  // Speichert alte Werte nur für Variablen
+			foreach (self::$stack as &$entry) {
+				if ($entry['name'] === $varName) {
+					$currentVersion = max($currentVersion, $entry['version'] + 1);
+					// Falls es sich um eine Variable handelt (kein Objekt), speichere alten Wert
+					if (!is_object($var) && isset($entry['data'])) {
+						$history = $entry['history'] ?? [];
+						$history[] = [
+							'version' => $entry['version'],
+							'data' => $entry['data'],
+							'timestamp' => $entry['timestamp'],
+						];
+					}
+				}
+			}		
+		
+		
             // Logik für das Hinzufügen der Variablen zum Stack
-            if ( self::getOption('OverwriteStackVar') ) {
+            if ( self::getOption('OverwriteStackVars') ) {
                 foreach (self::$stack as &$entry) {
                     if ($entry['name'] === $varName) {
                         $entry['data'] = $var;
                         $entry['timestamp'] = time();
                         $entry['elapsedTime'] = $elapsedTime;
+                        $entry['varType'] = $varType;                        
                         $entry['type'] = '';
                         $entry['size'] = self::calculateSize($var);
                         $entry['elementCount'] = self::countElements($var);
+                        $entry['memoryAddress'] = $memoryAddress;	
+						$entry['version'] += 1; // Version um 1 erhöhen                                      
+                        $entry['history'] = $history; // Setze die aktualisierte Historie						
                         $updated = true;
                         break;
                     }
@@ -712,9 +858,13 @@ protected static function checkVarName($varName) {
                     'data' => $var,
                     'timestamp' => time(),
                     'elapsedTime' => $elapsedTime,
-                    'type' => '',
+                    'varType' => $varType,
+                    'type' => '',                    
                     'size' => self::calculateSize($var),
                     'elementCount' => self::countElements($var),
+                    'memoryAddress' => $memoryAddress,
+                    'version' => $currentVersion, // Korrekte Version setzen                                                              
+					'history' => $history, // Nur für Variablen
                 ];
             }
         }
@@ -722,6 +872,96 @@ protected static function checkVarName($varName) {
 
     }
     
+	
+	
+	
+public static function dump_(...$vars) {
+    $varNames = self::getVariableNames();
+
+    foreach ($vars as $index => $var) {
+        $varName = isset($varNames[$index]) ? trim($varNames[$index]) : 'Variable_' . (count(self::$stack) + 1);
+        $varName = self::checkVarName($varName);
+
+        $memoryAddress = is_object($var) ? spl_object_id($var) : null;
+
+        // Zusätzliche Infos für Objekte
+        $varType = gettype($var);
+        $varSize = self::calculateSize($var);
+        $elementCount = self::countElements($var);
+        $isObject = is_object($var);
+        $isArray = is_array($var);
+        $isCallable = is_callable($var);
+        $isResource = is_resource($var);
+        $resourceType = $isResource ? get_resource_type($var) : null;
+        $varClass = $isObject ? get_class($var) : null;
+        $varMethods = $isObject ? get_class_methods($var) : null;
+        $varProperties = $isObject ? get_object_vars($var) : null;
+        $varParents = $isObject ? class_parents($var) : null;
+        $varInterfaces = $isObject ? class_implements($var) : null;
+        $varTraits = $isObject ? class_uses($var) : null;
+        $declaringFile = $isObject ? (new \ReflectionClass($var))->getFileName() : null;
+
+        $updated = false;
+        $elapsedTime = self::getElapsedTime();
+
+        if (self::getOption('OverwriteStackVar')) {
+            foreach (self::$stack as &$entry) {
+                if ($entry['name'] === $varName) {
+                    $entry['data'] = $var;
+                    $entry['timestamp'] = time();
+                    $entry['elapsedTime'] = $elapsedTime;
+                    $entry['type'] = $varType;
+                    $entry['size'] = $varSize;
+                    $entry['elementCount'] = $elementCount;
+                    $entry['memoryAddress'] = $memoryAddress;
+                    $entry['isObject'] = $isObject;
+                    $entry['isArray'] = $isArray;
+                    $entry['isCallable'] = $isCallable;
+                    $entry['isResource'] = $isResource;
+                    $entry['resourceType'] = $resourceType;
+                    $entry['varClass'] = $varClass;
+                    $entry['varMethods'] = $varMethods;
+                    $entry['varProperties'] = $varProperties;
+                    $entry['varParents'] = $varParents;
+                    $entry['varInterfaces'] = $varInterfaces;
+                    $entry['varTraits'] = $varTraits;
+                    $entry['declaringFile'] = $declaringFile;
+                    $updated = true;
+                    break;
+                }
+            }
+        }
+
+        if (!$updated) {
+            self::$stack[] = [
+                'name' => $varName,
+                'data' => $var,
+                'timestamp' => time(),
+                'elapsedTime' => $elapsedTime,
+                'type' => $varType,
+                'size' => $varSize,
+                'elementCount' => $elementCount,
+                'memoryAddress' => $memoryAddress,
+                'isObject' => $isObject,
+                'isArray' => $isArray,
+                'isCallable' => $isCallable,
+                'isResource' => $isResource,
+                'resourceType' => $resourceType,
+                'varClass' => $varClass,
+                'varMethods' => $varMethods,
+                'varProperties' => $varProperties,
+                'varParents' => $varParents,
+                'varInterfaces' => $varInterfaces,
+                'varTraits' => $varTraits,
+                'declaringFile' => $declaringFile,
+            ];
+        }
+    }
+}
+	
+	
+	
+	
 
     /**
      * Fügt einen Infotext zum Stack hinzu.
@@ -772,16 +1012,16 @@ protected static function checkVarName($varName) {
     }
 
 
-// Berechnet die Versionsnummer basierend auf der Option `assetsNoCache`
-protected static function getAssetVersion($filePath) {
-    // Überprüfe die `assetsNoCache`-Option
-    if (self::getOption('assetsNoCache')) {
-        return round(microtime(true) * 1000); // Aktuelle Zeit in Millisekunden als Version
-    }
+	// Berechnet die Versionsnummer basierend auf der Option `assetsNoCache`
+	protected static function getAssetVersion($filePath) {
+		// Überprüfe die `assetsNoCache`-Option
+		if (self::getOption('assetsNoCache')) {
+			return round(microtime(true) * 1000); // Aktuelle Zeit in Millisekunden als Version
+		}
 
-    // Fallback: Wenn `assetsNoCache` nicht aktiviert ist, verwenden wir die `filemtime()`
-    return file_exists($filePath) ? filemtime($filePath) : round(microtime(true) * 1000);
-}    
+		// Fallback: Wenn `assetsNoCache` nicht aktiviert ist, verwenden wir die `filemtime()`
+		return file_exists($filePath) ? filemtime($filePath) : round(microtime(true) * 1000);
+	}    
 
 
     /**
@@ -791,6 +1031,11 @@ protected static function getAssetVersion($filePath) {
      * @param mixed ...$selectedVars
      */
     public static function dumpOut(...$selectedVars) {
+		
+		// Prüfe, ob die Übersetzungen bereits geladen wurden
+		if (empty(self::$translations)) {
+			self::loadTranslations(); // Lade die Sprachdateien nur, wenn sie nicht schon geladen sind
+		}		
 
         // Erhöhe den Dump-Zähler und erzeuge eindeutige IDs für diesen Dump
         self::$dumpCounter++; // Zähler hochzählen
@@ -886,7 +1131,8 @@ protected static function getAssetVersion($filePath) {
 
 
         echo '<div class="dump-search-wrapper">  <!-- Wrapper um das Input und Buttons -->';
-        echo '<input type="text" id="search-' . $dumpId . '" class="dump-input" placeholder="🔍 Suchen..." oninput="highlightSearch(\'' . $dumpId . '\')">';   
+        echo '<input type="text" id="search-' . $dumpId . '" class="dump-input" placeholder="' . _t('search_icon','🔍') . ' ' . _t('search_text','Search...') . '" oninput="highlightSearch(\'' . $dumpId . '\')">';
+
 
         echo '<div class="toggle-buttons">
                     <button class="toggle-btn" id="whole-word-toggle-' . $dumpId . '" onclick="toggleWholeWord(\'' . $dumpId . '\')">
@@ -960,24 +1206,100 @@ protected static function getAssetVersion($filePath) {
                 echo '<div class="var-wrapper">';
 
                 echo '<div class="varName">' . $varName . ': ';
-                echo '<button class="info-icon-btn" onclick="toggleVarInfo(\'' . $infoID. '\')">';
-                echo '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="info-icon">
+                echo '<button title="'._t('more_infos','More Information').'" class="info-icon-btn" onclick="toggleVarInfo(\'' . $infoID. '\')">';
+                echo '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="info-icon" >
                           <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
-                          <text x="12" y="19.1" font-size="18" text-anchor="middle" fill="currentColor" font-family="Georgia, serif" font-weight="bold">i</text>
+                          <text x="12" y="18.5" font-size="17" text-anchor="middle" fill="currentColor" font-family="Georgia, serif" font-weight="bold">i</text>
                       </svg>';
                 echo '</button>';
+
+                // Überprüfe, ob eine Historie vorhanden ist und zeige den Button nur dann an
+                if (!empty($entry['history'])) {
+                    echo '<button title="'._t('show_history','History').'" class="history-icon-btn" onclick="toggleVarHistory(\'' . $infoID. '\')">';
+                    echo '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="history-icon" >
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                            <text x="12" y="18.5" font-size="17" text-anchor="middle" fill="currentColor" font-family="Georgia, serif" font-weight="bold">H</text>
+                        </svg>';
+                    echo '</button>';
+                }                
+             
                 echo '</div>';
+
+
+                echo self::formatVar($entry['data'], $dumpId . '-var' . $index, 1);                
 
                 // Zeige Timestamp, ElapsedTime und Size
                 echo '<div class="varInfo" id="' . $infoID . '-varInfo" style="display:none;">';  // Initial versteckt
-                echo '<div class="varInfoItem varTimestamp">Timestamp: <span class="varInfoItemValue">' . date(self::getOption('TimeInfoFormat'), $entry['timestamp']) . '</span></div>';
-                echo '<div class="varInfoItem varElapsedTime">Elapsed Time: <span class="varInfoItemValue">' . number_format($entry['elapsedTime'], 5) . 's</span></div>';
-                echo '<div class="varInfoItem varSize">Size: <span class="varInfoItemValue">' . number_format($entry['size']) . ' bytes</span></div>';
-                echo '<div class="varInfoItem varCount">Element Count: <span class="varInfoItemValue">' . $entry['elementCount'] . '</span></div>';    
+                echo '<div class="varInfo-head">'._t('more_infos','More Information').'</div>';                
+                echo '<div class="varInfoItem varTimestamp">'._t('timestamp','Timestamp').': <span class="varInfoItemValue">' . date(self::getOption('TimeInfoFormat'), $entry['timestamp']) . '</span></div>';
+                echo '<div class="varInfoItem varElapsedTime">'._t('elapsed_time','Elapsed Time').': <span class="varInfoItemValue">' . number_format($entry['elapsedTime'], 5) . 's</span></div>';
+                echo '<div class="varInfoItem varSize">'._t('size','Size').': <span class="varInfoItemValue">' . number_format($entry['size']) . ' bytes</span></div>';
+                echo '<div class="varInfoItem varCount">'._t('element_count','Element Count').': <span class="varInfoItemValue">' . $entry['elementCount'] . '</span></div>';    
+                echo '<div class="varInfoItem varCount">'._t('var_type','Var Type').': <span class="varInfoItemValue">' . $entry['varType'] . '</span></div>';                    
     
-                echo '</div>';                
+                echo '</div>';   
+                
+                if (!empty($entry['history'])) {
+                    echo '<div class="varHistory" id="' . $infoID . '-varHistory" style="display:none;">';  // Initial versteckt
+                
+                    // Beginne die Liste der historischen Einträge
+                    echo '<div class="history-list">';
+                    echo '<div class="history-head">'._t('show_history','History').'</div>';
 
-                echo self::formatVar($entry['data'], $dumpId . '-var' . $index, 1);
+
+                    // Tabellenkopf
+                    echo '<div class="history-table">';
+                    echo '<div class="history-row history-header">';
+                    echo '<div class="history-cell history-version">Version</div>';
+                    echo '<div class="history-cell history-timestamp">Zeitpunkt</div>';                    
+                    echo '<div class="history-cell history-data">Wert</div>';
+
+                    echo '</div>'; // Ende Tabellenkopf
+
+
+                    // Zähler für den Index der Schleife
+                    $date_format = self::getOption('DateInfoFormat');
+                    $time_format = self::getOption('TimeInfoFormat');
+
+                    $index = 0;
+                    foreach ($entry['history'] as $historyEntry) {
+                        // Bestimme die Klasse basierend auf dem Index: gerade Zahlen bekommen 'even', ungerade 'odd'
+                        $class = ($index % 2 == 0) ? 'even' : 'odd';
+
+                        echo '<div class="history-row ' . $class . '">';
+                        echo '<div class="history-cell history-version">' . htmlspecialchars($historyEntry['version']) . '</div>';
+                        echo '<div class="history-cell history-timestamp">' . date($date_format.' '.$time_format, $historyEntry['timestamp']) . '</div>';                        
+                        echo '<div class="history-cell history-data">' . self::formatVar($historyEntry['data'], $infoID . '-history-' . $historyEntry['version'], 0) . '</div>';
+
+                        echo '</div>'; // Ende der Zeile
+
+                        $index++; // Inkrementiere den Index nach jeder Iteration
+                    }
+                    echo '</div></div></div>';  
+
+
+/*
+                        foreach ($entry['history'] as $historyEntry) {                        
+
+                            // Array oder Objekt
+
+                            echo '<div class="history-version">Version: ' . htmlspecialchars($historyEntry['version']) . '</div> ';
+                            echo '<div class="history-timestamp">Zeitpunkt: ' . date('Y-m-d H:i:s', $historyEntry['timestamp']) . '</div>';
+                            echo '<div class="history-data">Wert: </div>';
+                            echo self::formatVar($historyEntry['data'], $infoID . '-history-' . $historyEntry['version'], 0);                            
+                            echo 'Wert:'. self::formatVar($historyEntry['data'], $infoID . '-history-' . $historyEntry['version'], 0).'<br>';  
+                        }    
+*/
+
+
+                 //   echo '</div></div>';
+
+       
+                }
+                
+                                         
+
+
                 
                 echo '</div>';
 
@@ -1107,25 +1429,25 @@ protected static function getAssetVersion($filePath) {
 
         // Formatierung für boolesche Werte
         if (is_bool($var)) {
-            return '<span class="'.'dump-line-'.$level. ' dump-bool '. ($var ? 'bool-true' : 'bool-false') .'">' . ($var ? '✔ true' : '✖ false') . '</span>';
+            return '<span class="dump-value-caption">'._t('value','Wert').':</span> <span class="'.'dump-line-'.$level. ' dump-bool '. ($var ? 'bool-true' : 'bool-false') .'">' . ($var ? '✔ true' : '✖ false') . '</span>';
         }
         // Formatierung für Ganzzahlen
         if (is_int($var)) {
-            return '<span class="dump-int">' . $var . '</span>';
+            return '<span class="dump-value-caption">'._t('value','Wert').':</span> <span class="dump-int">' . $var . '</span>';
         }
         // Formatierung für Fließkommazahlen
         if (is_float($var)) {
-            return '<span class="dump-float">' . $var . '</span>';
+            return '<span class="dump-value-caption">'._t('value','Wert').':</span> <span class="dump-float">' . $var . '</span>';
         }
         // Formatierung für Strings
         if (is_string($var)) {
             return strpos($var, "\n") !== false 
-                ? '<pre class="dump-string">' . htmlspecialchars($var) . '</pre>' 
-                : '<span class="dump-string">"' . htmlspecialchars($var) . '"</span>';
+                ? '<span class="dump-value-caption">'._t('value','Wert').':</span><br> <pre class="dump-string">' . htmlspecialchars($var) . '</pre>' 
+                : '<span class="dump-value-caption">'._t('value','Wert').':</span> <span class="dump-string">"' . htmlspecialchars($var) . '"</span>';
         }
         // Formatierung für null
         if (is_null($var)) {
-            return '<span class="dump-null">null</span>';
+            return '<span class="dump-value-caption">'._t('value','Wert').':</span> <span class="dump-null">null</span>';
         }
 
         // Formatierung für Arrays

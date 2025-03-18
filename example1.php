@@ -130,7 +130,12 @@ use FancyDumpVar as FDV;
 
             // FancyDumpVar Instanz und Beispiel-Dump
             $debugger = new  \FancyDumpVar\FancyDumpVar();
-            $debugger->dump($recursiveData, $testArray, $testArray2, $emptyObject, $testObj, $debugger);  // Daten dumpen
+            $debugger->dump($recursiveData, $testArray, $testArray2, $emptyObject, $testObj, $debugger);
+
+			// Sprache setzen
+            $debugger->setOption('language', 'de');			
+
+			// Daten dumpen
             $debugger->dumpOut();  // Ausgabe der gedumpten Daten
 
             // Optionen ausgeben

@@ -177,3 +177,21 @@ function toggleVarInfo(dumpId) {
         button.classList.add('inactive');  // Fügt die 'inactive' Klasse hinzu
     }
 }
+
+
+
+function toggleVarHistory(historyId) {
+    var varHistory = document.getElementById(historyId + '-varHistory');
+    var button = document.querySelector('[onclick="toggleVarHistory(\'' + historyId + '\')"]');
+
+    // Toggle Sichtbarkeit der History
+    if (varHistory.style.display === 'none' || varHistory.style.display === '') {
+        varHistory.style.display = 'block';  // Zeigt den Container an
+        button.classList.add('active');      // Aktiviert das Icon
+    } else {
+        varHistory.style.display = 'none';   // Versteckt den Container
+        button.classList.remove('active');   // Deaktiviert das Icon
+    }
+}
+
+

@@ -464,15 +464,41 @@ INPUT.dump-input {
     border: 2px solid rgb(164, 0, 0); 
 }
 
+
+
+
+.dump-value-caption {
+  color: rgb(0, 85, 164); 
+  font-weight: bold; 
+}
+
+
+
+
 .varInfo {
     gap: 14px; /* Abstand zwischen den span-Elementen */    
     display: inline-flex;
     font-size: 0.8em;
     background-color: rgba(212, 212, 212, 0.182);
     color:rgb(83, 83, 83);
-    border-radius:  8px; 
+    border-radius:  0px; 
     padding: 2px;  
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);    
 }
+
+
+.varInfo-head {
+    background-color: rgba(0, 85, 164, 0);
+    font-family: Arial, sans-serif; /* Verhindert Emoji-Darstellung */   
+    font-weight: bold;  
+    color: rgb(95, 95, 95);
+    font-size: 1.1em;
+    text-align: left;
+    padding: 4px 4px 4px 0;
+    border-radius: 8px;
+}
+
 
 .varInfoItemValue {
     font-weight: bold;
@@ -496,30 +522,145 @@ INPUT.dump-input {
 }
 
 /* Stil für den Button */
-.info-icon-btn {
+.info-icon-btn, .history-icon-btn {
     background-color: transparent;  /* Optional: Entfernt den Button-Hintergrund */
     border: none;                   /* Optional: Entfernt den Button-Rand */
     padding: 0;                     /* Optional: Entfernt die Polsterung des Buttons */
     cursor: pointer;                /* Zeigt den Hand-Cursor an */
     color: #a0a0a077;  /* Setzt die Farbe auf Blau */    
-    width: 15px;
-    height: 15px;
+    width: 18px;
+    height: 18px;
 }
 
-.info-icon-btn:hover {
-    color: rgb(0, 72, 140);    
+.info-icon-btn:hover,.history-icon-btn:hover {
+    color: rgb(0, 72, 140);     
 }
+
 /* Stil für den aktiven Zustand */
-.info-icon-btn.active {
+.info-icon-btn.active, .history-icon-btn.active {
     color: rgb(0, 72, 140);   
+    transform: scale(1.1) rotate(720deg);  /* Kleiner & zurückdrehen */
+    transition: transform 0.4s ease-in-out;    
 }
+
+/* Wenn die Klasse aktiv entfernt wird, smooth zurück */
+.info-icon-btn:not(.active),.history-icon-btn:not(.active) {
+    transform: scale(1.0) rotate(0deg);  /* Kleiner & zurückdrehen */
+    transition: transform 0.4s ease-in-out;
+}
+
+
+
+
+
 /* Stil für den inaktiven Zustand */
 .info-icon-btn.inactive {
-    color: rgb(0, 72, 140);   
 }
 
 
 /* Stil für das SVG-Bild im Button */
 .info-icon {
     fill: currentColor;  /* Ändert die Füllfarbe basierend auf der Textfarbe */
+}
+
+
+
+
+
+/* Grundlegende Stilisierung der Historienliste */
+.history-list {
+    width: 100%; /* Nutzt die volle Breite des Elternelements */
+    max-width: 100; /* Verhindert ein Herausragen über den Container hinaus */
+    overflow-x: auto; /* Fügt einen horizontalen Scrollbalken bei Bedarf hinzu */
+    font-size: 0.8rem;
+    max-height: 400px; /* Setze eine maximale Höhe */
+    overflow-y: auto; /* Ermöglicht vertikales Scrollen, wenn der Inhalt die maximale Höhe überschreitet */
+    overflow-x: hidden; /* Verhindert horizontales Scrollen */    
+
+    background-color: rgba(212, 212, 212, 0.182);
+    padding: 2px 0px 0px 2px;    
+    margin-bottom: 10px;
+
+}
+
+.history-head {
+    background-color: rgba(0, 85, 164, 0);
+    font-family: Arial, sans-serif; /* Verhindert Emoji-Darstellung */   
+    font-weight: bold;  
+    color: rgb(95, 95, 95);
+    font-size: 1.1em;
+    text-align: left;
+    padding: 4px 4px 4px 0;
+    border-radius: 8px;
+}
+
+.history-row {
+    display: grid;
+    grid-template-columns: 60px 160px 200px auto; /* Verteilung der Spaltenbreiten */
+    gap: 10px;
+    padding: 1px 10px 1px 10px;
+    transition: transform 0.3s ease-in-out, font-size 0.3s ease-in-out; /* Sanfte Animation */    
+}
+
+.history-row:hover {
+    transform: scale(1.05); /* 5% Vergrößerung beim Hover */ 
+}    
+
+/* Verzögerung beim Zurückzoomen */
+.history-row:not(:hover) {
+    transition: transform 0.3s ease-in-out, font-size 0.3s ease-in-out; /* Langsamer zurück */
+}
+
+.history-cell {
+    padding: 0px;
+    border-bottom: 0px solid #cccccc00;
+    background-color: #f9f9f900;
+
+    min-height: 20px; /* Sorgt dafür, dass alle Zellen eine Mindesthöhe haben */    
+}
+
+/* Spezifische Stilisierung für gerade und ungerade Zeilen */
+.history-row.even {
+    background-color: #717f8410;
+}
+
+.history-row.odd {
+    background-color: #ffffff00;
+}
+
+.history-row:hover {
+    background-color: #ffffff;
+    box-shadow: 0 0 4px rgba(0, 85, 164, 0.602);    
+}
+
+/* Stilisierung für die Zellen */
+.history-cell.history-version,
+.history-cell.history-timestamp {
+    text-align: center;
+}
+
+.history-cell.history-data {
+    text-align: left;
+}
+
+.history-header {
+    font-weight: bold;
+    color: rgb(0, 85, 164);
+}
+
+.history-list .dump-toggler-wrapper:hover {
+    background: none;
+}
+
+
+/* Responsive Anpassungen */
+@media (max-width: 600px) {
+    .history-row {
+        grid-template-columns: 1fr; /* Alle Elemente untereinander bei kleinen Bildschirmen */
+        text-align: center;
+    }
+
+    .history-cell {
+        border-bottom: none; /* Entferne Linien für ein sauberes Aussehen auf kleinen Bildschirmen */
+    }
 }

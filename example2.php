@@ -13,14 +13,18 @@ require_once 'src/FancyDumpVar.php';  // Einbinden der FancyDumpVar-Klasse
 
 use FancyDumpVar\FancyDumpVar as FDV; // Alias setzen, um die Klasse als FDV zu verwenden
 
+
+
 // Testdaten und Beispielklassen
 $testArray = ["name" => "John", "age" => 30, "size" => 1.93, "job" => "Developer", "male" => true, "female" => false ];
 $testArray2 = ["name" => "Jane", "age" => 28, "job" => "Designer"];
+$simpleINT = 10;
+$simpleFLOAT = 34.67;
 
 // Beispielklasse mit öffentlichen, privaten und geschützten Eigenschaften
 class TestClass {
     public string $message;  // Öffentliche Eigenschaft für eine Nachricht
-    public int $number;      // Öffentliche Eigenschaft für eine Zahl
+    public int $number;      // Öffentliche Eigenschaft für eine Zahl   
 
     private string $password;      // Private Eigenschaft für ein Passwort
     protected string $password_key;  // Geschützte Eigenschaft für einen Passwortschlüssel
@@ -108,7 +112,7 @@ $emptyObject = new class {};
         // FDV::setOption('customCssFile', 'VisualStudioStyle.css');  // Alternativ eine benutzerdefinierte CSS-Datei laden        
         // FDV::setOption('customCssFile', 'monocrom.css');  // Ein weiteres Beispiel für benutzerdefiniertes CSS    
         // FDV::setOption('customCssFile', 'monolight.css');  // Ein weiteres Beispiel für benutzerdefiniertes CSS                
-        FDV::setTitle('Debug Ausgabe'); // Statische Methode aufrufen, um den Titel der Ausgabe zu setzen
+        FDV::setOption('Title','Debug Ausgabe1'); // Statische Methode aufrufen, um den Titel der Ausgabe zu setzen
         // FDV::setmaxDepth(10); // Rekursionstiefe anpassen, um tiefere Strukturen zu unterstützen
 
 
@@ -128,7 +132,44 @@ $emptyObject = new class {};
             ['key1' => 'value1', 'key2' => 'value2', 'key3' => 'value3'],  // Array direkt im Funktionsaufruf
             $testObj
         );
+        FDV::setOption('Title','Debug Ausgabe2'); // Statische Methode aufrufen, um den Titel der Ausgabe zu setzen        
         FDV::dumpOut();  // Gibt alle gedumpten Variablen aus
+
+
+        // Initiale Werte setzen
+        $simpleINT = 10;
+        $simpleFLOAT = 34.67;
+        $testArray2 = ["name" => "Jane", "age" => 28, "job" => "Designer"];
+
+        // Stack leeren
+        FDV::clearStack();
+
+        for ($i = 0; $i < 10; $i++) {
+            // Zufällige Werte für jede Iteration generieren
+            $simpleINT = rand(1, 100);                 // Zufällige Zahl zwischen 1 und 100
+            $simpleFLOAT = rand(10, 100) + (rand(0, 99) / 100);  // Zufällige Float-Zahl zwischen 10 und 100 mit Nachkommastellen
+
+            // Array-Werte zufällig ändern
+            $testArray2["name"] = ["Jane", "John", "Alice", "Bob"][array_rand(["Jane", "John", "Alice", "Bob"])];
+            $testArray2["age"] = rand(20, 60);
+            $testArray2["job"] = ["Designer", "Developer", "Manager", "Artist"][array_rand(["Designer", "Developer", "Manager", "Artist"])];
+
+            // Werte in FDV::dump() speichern
+            FDV::dump($simpleINT, $simpleFLOAT, $testArray2, $debugger);         
+
+            // Kleiner Delay für bessere Nachverfolgbarkeit
+            usleep(5000); // 50ms Pause
+        }     
+        FDV::setOption('Title','Debug Ausgabe2'); // Statische Methode aufrufen, um den Titel der Ausgabe zu setzen        
+        FDV::dumpOut();  // Gibt alle gedumpten Variablen aus        
+
+
+
+
+
+
+
+
     ?>    
     </div>
 </body>
