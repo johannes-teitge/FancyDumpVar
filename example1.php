@@ -135,6 +135,12 @@ use FancyDumpVar as FDV;
 			// Sprache setzen
             $debugger->setOption('language', 'de');			
 
+			// Titel setzen
+            $debugger->setOption('Title', 'Example1 Output');	
+			
+			// CSS-File setzen
+            $debugger->setOption('customCssFile', 'monocrom.css');				
+
 			// Daten dumpen
             $debugger->dumpOut();  // Ausgabe der gedumpten Daten
 

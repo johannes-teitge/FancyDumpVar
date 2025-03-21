@@ -158,7 +158,7 @@ $emptyObject = new class {};
             FDV::dump($simpleINT, $simpleFLOAT, $testArray2, $debugger);         
 
             // Kleiner Delay für bessere Nachverfolgbarkeit
-            usleep(5000); // 50ms Pause
+            usleep(50000); // 50ms Pause
         }     
         FDV::setOption('Title','Debug Ausgabe2'); // Statische Methode aufrufen, um den Titel der Ausgabe zu setzen        
         FDV::dumpOut();  // Gibt alle gedumpten Variablen aus        

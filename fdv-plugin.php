@@ -83,6 +83,14 @@ if (file_exists($fdv_file)) {
         
         // Überprüfen, ob die Klasse nach dem Laden verfügbar ist
         if (class_exists('\FancyDumpVar\FancyDumpVar')) {
+
+            // Nun globale Variable anlegen
+            // Globale Instanz von FancyDumpVar erstellen
+            if ( ! isset( $GLOBALS['FDV'] ) ) {
+                $GLOBALS['FDV'] = new \FancyDumpVar\FancyDumpVar();
+            }            
+
+
             // Nur loggen, wenn FDV_DEV auf true gesetzt ist
             if (FDV_DEV === true) {
                 error_log("[$timestamp] [$success_icon] [INFO] FDV Plugin: Klasse 'FancyDumpVar' erfolgreich geladen aus der Datei: $fdv_file");

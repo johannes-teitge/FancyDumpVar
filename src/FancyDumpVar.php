@@ -6,8 +6,8 @@ namespace FancyDumpVar;
  *
  * Eine Utility-Klasse zur eleganten Ausgabe und Darstellung von Variablen.
  *
- * Version: 2.5.6
- * Datum: 2025-03-14
+ * Version: 2.5.8
+ * Datum: 2025-03-19
  *
  * Copyright (C) 2025 Johannes Teitge <johannes@teitge.de>
  *
@@ -275,16 +275,23 @@ class FancyDumpVar {
         'assetsNoCache' => false,   // Option zur Deaktivierung des Caching (Standard: false)   
         'sortPropertiesAndMethods' => false, // Flag, ob Properties und Methoden sortiert ausgegeben werden sollen
         'ShowTimeInfo' => false, 
-        'TimeInfoFormat' => "h:i:sa ",    
+        'TimeInfoFormat' => "h:i:s",    
         'DateInfoFormat' => "d.m.Y ", 
         'OverwriteStackVars' => true, 
         'Title' => '',
         'customCssFile' => '', 
+        'helpUrl' => 'https://github.com/johannes-teitge/FancyDumpVar',
 
         'images' => [               // Beispiel für Bildoptionen
             'iconInfo' => 'path/to/icon_info.svg', 
             'iconError' => 'path/to/icon_error.svg'
         ],
+    
+		// Neue Optionen für den Wrapper und den Stil
+		'dumpWrapper' => true,   // Flag, um den Wrapper zu aktivieren
+		// 'dumpWrapperStyle' => 'border: 2px solid #ccc; padding: 10px;', // Standard CSS-Stil für den Wrapper
+		'dumpWrapperStyle' => '', // Standard CSS-Stil für den Wrapper
+		
     ];
 
     /**
@@ -837,7 +844,7 @@ public static function translate($key, $default = null, $placeholders = []) {
                 foreach (self::$stack as &$entry) {
                     if ($entry['name'] === $varName) {
                         $entry['data'] = $var;
-                        $entry['timestamp'] = time();
+                        $entry['timestamp'] = microtime(true);
                         $entry['elapsedTime'] = $elapsedTime;
                         $entry['varType'] = $varType;                        
                         $entry['type'] = '';
@@ -856,7 +863,7 @@ public static function translate($key, $default = null, $placeholders = []) {
                 self::$stack[] = [
                     'name' => $varName,
                     'data' => $var,
-                    'timestamp' => time(),
+                    'timestamp' => microtime(true),
                     'elapsedTime' => $elapsedTime,
                     'varType' => $varType,
                     'type' => '',                    
@@ -1097,7 +1104,15 @@ public static function dump_(...$vars) {
         }
 
 
+		// Prüfen, ob die Option 'dumpWrapper' aktiviert ist
+		$dumpWrapper = self::getOption('dumpWrapper');
+		$dumpWrapperStyle = self::getOption('dumpWrapperStyle');
 
+
+		// Wenn Custom 'dumpWrapper' aktiviert ist, dann füge einen Wrapper mit dem angegebenen Stil hinzu
+		if ($dumpWrapper) {
+			echo '<div class="fdv-wrapper" style="' . htmlspecialchars($dumpWrapperStyle) . '">';  // Wrapper mit Stil öffnen
+		}
    
     
         // Beginn der Wrapper-DIV für den Dump
@@ -1106,10 +1121,30 @@ public static function dump_(...$vars) {
 
 
         // Globale Zeile mit Toggle-Symbol [+] / [-] für die gesamte Dump-Ausgabe
+/*        
         echo '<div class="dump-title-bar" id="title-bar-dump-'.$ID.'" onclick="toggleDump(\'' . $dumpId . '\')">';
             echo '<span class="dump-toggler-symbol" id="toggle-' . $dumpId . '">+</span>';
             echo '<span class="dump-title">'.self::getOption('Title').'</span>'; // Optionaler Titel
         echo '</div>';
+*/
+
+    // Berechne die Anzahl der Variablen und Elemente
+    $variableCount = count(self::$stack);
+    $elementCount = 0;
+    foreach (self::$stack as $entry) {
+        $elementCount += self::countElements($entry['data']);
+    }
+
+// Globale Zeile mit Toggle-Symbol [+] / [-] für die gesamte Dump-Ausgabe
+echo '<div class="dump-title-bar" id="title-bar-dump-' . $ID . '" onclick="toggleDump(\'' . $dumpId . '\')">';
+    echo '<span class="dump-toggler-symbol" id="toggle-' . $dumpId . '">+</span>';  // Pluszeichen ganz links
+    echo '<div class="dump-info">';  // Container für die Infos
+        echo '<span class="variable-count">Variablen: ' . $variableCount . '</span>';
+        echo '<span class="element-count">Elemente: ' . $elementCount . '</span>';
+    echo '</div>';
+    echo '<span class="dump-title">' . self::getOption('Title') . '</span>'; // Optionaler Titel, rechtsbündig
+echo '</div>';
+      
 
      
 
@@ -1130,34 +1165,47 @@ public static function dump_(...$vars) {
         }
 
 
-        echo '<div class="dump-search-wrapper">  <!-- Wrapper um das Input und Buttons -->';
-        echo '<input type="text" id="search-' . $dumpId . '" class="dump-input" placeholder="' . _t('search_icon','🔍') . ' ' . _t('search_text','Search...') . '" oninput="highlightSearch(\'' . $dumpId . '\')">';
+        echo '<div class="dump-header">';
 
+        // Suchfeld bleibt links
+        echo '<div class="dump-search-wrapper">';  
+            echo '<input type="text" id="search-' . $dumpId . '" class="dump-input" placeholder="' . _t('search_icon','🔍') . ' ' . _t('search_text','Search...') . '" oninput="highlightSearch(\'' . $dumpId . '\')">';
+    
+            echo '<div class="toggle-buttons">
+                        <button class="toggle-btn" id="whole-word-toggle-' . $dumpId . '" onclick="toggleWholeWord(\'' . $dumpId . '\')">
+                            <img width="18px" src="' . $imagePath . 'button-whole-word.svg" alt="Whole Word" title="Nur ganzes Wort suchen">
+                        </button>
+                        <button class="toggle-btn" id="case-sensitive-toggle-' . $dumpId . '" onclick="toggleCaseSensitive(\'' . $dumpId . '\')">
+                            <img width="18px" src="' . $imagePath . 'button-case.svg" alt="Case Sensitive" title="Groß- und Kleinschreibung beachten">
+                        </button>
+                    </div>';           
+            echo '<button  class="toggle-btn fdv-clear" onclick="clearSearch(\'' . $dumpId . '\')">
+                        <img width="18px" src="' . $imagePath . 'button-clear.svg" alt="Clear" title="Suche zurücksetzen">
+                    </button>';
+        echo '</div>'; // Ende Suchfeld-Wrapper
+    
+        // Container für Expand/Close & Help-Buttons (Bleibt rechts)
+        echo '<div class="dump-control-buttons">'; 
+            echo '<div class="dump-tree">';           
+                echo '<button id="toggle-btn-' . $dumpId . '" class="dump-btn toggle" onclick="toggleExpandAll(\'' . $dumpId . '\')">
+                        <img id="toggle-icon-' . $dumpId . '" src="' . $imagePath . 'folder_expand.svg" alt="Expand All">
+                    </button>';    
+            echo '</div>';
+    
+            // Help-Button
+            $helpUrl = self::getOption('helpUrl');
+            echo '<div class="dump-help">';
+            echo '<a href="' . htmlspecialchars($helpUrl) . '" target="_blank" class="dump-btn help">
+                    <img src="' . $imagePath . 'help.svg" alt="Help">
+                </a>';
+            echo '</div>';
+        echo '</div>'; // Ende der dump-controls
+    
+    echo '</div>'; // Ende des übergeordneten Containers `dump-header`
 
-        echo '<div class="toggle-buttons">
-                    <button class="toggle-btn" id="whole-word-toggle-' . $dumpId . '" onclick="toggleWholeWord(\'' . $dumpId . '\')">
-                        <img width="18px" src="' . $imagePath . 'button-whole-word.svg" alt="Whole Word" title="Nur ganzes Wort suchen">
-                    </button>
-                    <button class="toggle-btn" id="case-sensitive-toggle-' . $dumpId . '" onclick="toggleCaseSensitive(\'' . $dumpId . '\')">
-                        <img width="18px" src="' . $imagePath . 'button-case.svg" alt="Case Sensitive" title="Groß- und Kleinschreibung beachten">
-                    </button>
-                </div>';           
-        echo '<button  class="toggle-btn fdv-clear" onclick="clearSearch(\'' . $dumpId . '\')">
-                    <img width="18px" src="' . $imagePath . 'button-clear.svg" alt="Clear" title="Suche zurücksetzen">
-                </button>';
-        echo '</div> <!-- Ende des Wrappers -->';
-
-
-
-
-        // Expand / Close Buttons
-        echo '<div class="dump-tree">';           
-        echo '<button class="dump-btn expand" onclick="expandAll(\'' . $dumpId . '\')">Expand All</button>';
-        echo '<button class="dump-btn fdv-close" onclick="closeAll(\'' . $dumpId . '\')">Close All</button>';
-        echo '<button class="dump-btn help" onclick="window.open(\'https://teitge.de/fancydumpvar-debugging-neu-gedacht/\', \'_blank\');">?</button>';         
-        echo '</div>';
-
-        echo '</div>'; // Ende der dump-controls   
+echo '</div>'; // Ende des übergeordneten Containers `dump-header`
+    
+   
         
         
 
@@ -1226,12 +1274,20 @@ public static function dump_(...$vars) {
                 echo '</div>';
 
 
-                echo self::formatVar($entry['data'], $dumpId . '-var' . $index, 1);                
+                echo self::formatVar($entry['data'], $dumpId . '-var' . $index, 1);     
+                
+                    // Zähler für den Index der Schleife
+                    $date_format = self::getOption('DateInfoFormat');
+                    $time_format = self::getOption('TimeInfoFormat');
+
+                $timestamp = $entry['timestamp']; // Gespeicherter Wert von microtime(true)
+                $seconds = floor($timestamp); // Ganze Sekunden
+                $milliseconds = sprintf("%03d", ($timestamp - $seconds) * 1000); // Millisekunden (3 Stellen)                        
 
                 // Zeige Timestamp, ElapsedTime und Size
                 echo '<div class="varInfo" id="' . $infoID . '-varInfo" style="display:none;">';  // Initial versteckt
                 echo '<div class="varInfo-head">'._t('more_infos','More Information').'</div>';                
-                echo '<div class="varInfoItem varTimestamp">'._t('timestamp','Timestamp').': <span class="varInfoItemValue">' . date(self::getOption('TimeInfoFormat'), $entry['timestamp']) . '</span></div>';
+                echo '<div class="varInfoItem varTimestamp">'._t('timestamp','Timestamp').': <span class="varInfoItemValue">' . date($date_format, $seconds) . ' ' .date($time_format, $seconds) . ' ' . $milliseconds . 'ms'. '</span></div>';
                 echo '<div class="varInfoItem varElapsedTime">'._t('elapsed_time','Elapsed Time').': <span class="varInfoItemValue">' . number_format($entry['elapsedTime'], 5) . 's</span></div>';
                 echo '<div class="varInfoItem varSize">'._t('size','Size').': <span class="varInfoItemValue">' . number_format($entry['size']) . ' bytes</span></div>';
                 echo '<div class="varInfoItem varCount">'._t('element_count','Element Count').': <span class="varInfoItemValue">' . $entry['elementCount'] . '</span></div>';    
@@ -1257,18 +1313,24 @@ public static function dump_(...$vars) {
                     echo '</div>'; // Ende Tabellenkopf
 
 
-                    // Zähler für den Index der Schleife
-                    $date_format = self::getOption('DateInfoFormat');
-                    $time_format = self::getOption('TimeInfoFormat');
+
+             
 
                     $index = 0;
                     foreach ($entry['history'] as $historyEntry) {
                         // Bestimme die Klasse basierend auf dem Index: gerade Zahlen bekommen 'even', ungerade 'odd'
                         $class = ($index % 2 == 0) ? 'even' : 'odd';
 
+                        $timestamp = $historyEntry['timestamp']; // Gespeicherter Wert von microtime(true)
+                        $seconds = floor($timestamp); // Ganze Sekunden
+                        $milliseconds = sprintf("%03d", ($timestamp - $seconds) * 1000); // Millisekunden (3 Stellen)                               
+
                         echo '<div class="history-row ' . $class . '">';
                         echo '<div class="history-cell history-version">' . htmlspecialchars($historyEntry['version']) . '</div>';
-                        echo '<div class="history-cell history-timestamp">' . date($date_format.' '.$time_format, $historyEntry['timestamp']) . '</div>';                        
+                        echo '<div class="history-cell history-timestamp">';
+                        echo '📅 ' . date($date_format, $seconds) . '<br>';
+                        echo '🕒 ' . date($time_format, $seconds) . ' ' . $milliseconds . 'ms';
+                        echo '</div>';                 
                         echo '<div class="history-cell history-data">' . self::formatVar($historyEntry['data'], $infoID . '-history-' . $historyEntry['version'], 0) . '</div>';
 
                         echo '</div>'; // Ende der Zeile
@@ -1325,6 +1387,11 @@ public static function dump_(...$vars) {
         }
     
         echo '</div></div>';
+		
+		// Wenn der Wrapper aktiviert wurde, dann schließe den Wrapper
+		if ($dumpWrapper) {
+			echo '</div>';  // Wrapper schließen
+		}		
     
         // Optional: Leert den Stack, falls alle Variablen ausgegeben wurden
         // self::$stack = [];
@@ -1461,7 +1528,7 @@ public static function dump_(...$vars) {
 
             $output .= '<div class="dump-content-level-'.$level.' dump-content hidden" id="' . $id . '">';
             foreach ($var as $key => $value) {
-                $output .= '<div class="dump-array-item">' . $indent . '<span class="dump-key">[' . htmlspecialchars($key) . ']</span> => ' . self::formatVar($value, $id . '-' . $key, $level + 1) . '</div>';
+                $output .= '<div class="dump-array-item">' . $indent . '<span class="dump-key"><span class="dumpbracket">[</span>' . htmlspecialchars($key) . '<span class="dumpbracket">]</span></span><span class="class-arrow"> => </span>' . self::formatVar($value, $id . '-' . $key, $level + 1) . '</div>';
             }
             $output .= '</div></div>';
             return $output;
@@ -1527,8 +1594,8 @@ public static function dump_(...$vars) {
                             // Speichern, um doppelte Einträge zu vermeiden
                             $declaredProperties[$propName] = true;
 
-                            $output .= '<div class="dump-object-item">[<span class="fds_propname_visibility ' . $visibility . '">' . $visibility . '</span>] ';
-                            $output .= '<span class="fds_propname">$' . htmlspecialchars($propName) . '</span> => ';
+                            $output .= '<div class="dump-object-item"><span class="obj-dumpbracket">[</span><span class="fds_propname_visibility ' . $visibility . '">' . $visibility . '</span><span class="obj-dumpbracket">]</span> ';
+                            $output .= '<span class="fds_propname">$' . htmlspecialchars($propName) . '</span></span><span class="class-arrow"> => </span>';
 
                             try {
                                 $output .= self::formatVar($prop->getValue($var), $id . '-prop-' . $propName, $level + 1);
@@ -1552,8 +1619,8 @@ public static function dump_(...$vars) {
                             if (isset($declaredProperties[$key])) {
                                 continue;
                             }
-                            $output .= '<div class="dump-object-item">[<span class="fds_propname_visibility public">dynamic</span>] ';
-                            $output .= '<span class="fds_propname">$' . htmlspecialchars($key) . '</span> => ';
+                            $output .= '<div class="dump-object-item"><span class="obj-dumpbracket">[</span><span class="fds_propname_visibility public">dynamic</span><span class="obj-dumpbracket">]</span> ';
+                            $output .= '<span class="fds_propname">$' . htmlspecialchars($key) . '</span></span><span class="class-arrow"> => </span>';
                             try {
                                 $output .= self::formatVar($value, $id . '-prop-' . $key, $level + 1);
                             } catch (Throwable $dynPropError) {
