@@ -3,7 +3,7 @@
     border: 1px solid #ccc;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    background: #f9f9f9;
+    background: #f9f9f900;
     overflow: hidden;
     margin-bottom: 10px;
     padding: 0; /* Fix: Falsches : entfernt */
@@ -251,7 +251,7 @@ display: flex;
 align-items: center;
 justify-content: space-between;
 padding: 4px 15px;
-background: linear-gradient(90deg, rgb(0, 85, 164), rgb(0, 85, 164));
+background: linear-gradient(90deg, rgba(0, 85, 164, 0.6), rgba(0, 85, 164, 0.6));
 color: white;
 font-weight: bold;
 cursor: pointer; /* Zeigt an, dass die ganze Leiste klickbar ist */
@@ -263,6 +263,7 @@ font-family: Arial, sans-serif; /* Verhindert Emoji-Darstellung */
 }
 
 .dump-title-bar.open {
+    background: linear-gradient(90deg, rgb(0, 85, 164), rgb(0, 85, 164));
 }
 
 
@@ -772,6 +773,12 @@ INPUT.dump-input {
 
 
 
+/* Optional: Den Cursor auf dem Rest der Seite wieder auf Standard setzen */
+body, .dump-container {
+    cursor: default;
+}
+
+
 /* Grundlegende Wrapper-Stile */
 .fdv-wrapper {
     position: fixed;
@@ -785,11 +792,11 @@ INPUT.dump-input {
     cursor: move; /* Zeigt den Pfeil für vertikales Ziehen */
 }
 
-/* Hinzufügen eines Anfassers */
+/* Hinzufügen eines oberen Anfassers */
 .fdv-wrapper:before {
     content: '';
     position: absolute;
-    top: -4px; /* Positionierung des Anfassers */
+    top: -4px; /* Positionierung des oberen Anfassers */
     left: 50%;
     transform: translateX(-50%); /* Zentriert den Anfasser */
     width: 200px;
@@ -799,10 +806,11 @@ INPUT.dump-input {
     transition: background-color 0.5s ease-in-out; /* Übergang für die Hintergrundfarbe */
 }
 
-/* Optional: Hover-Effekt für den Anfasser */
+/* Optional: Hover-Effekt für den oberen Anfasser */
 .fdv-wrapper:hover:before {
     background-color: rgb(70, 90, 109);    
 }
+  
 
 
 

@@ -610,10 +610,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Beim Start des Ziehens
     wrapper.addEventListener('mousedown', function(e) {
-        isDragging = true;
-        offsetX = e.clientX - wrapper.getBoundingClientRect().left;
-        offsetY = e.clientY - wrapper.getBoundingClientRect().top;
-        document.body.style.cursor = 'move'; // Cursor ändern
+        // Verhindern, dass das Event auf den inneren Elementen ausgelöst wird
+        if (e.target === wrapper) {
+            isDragging = true;
+            offsetX = e.clientX - wrapper.getBoundingClientRect().left;
+            offsetY = e.clientY - wrapper.getBoundingClientRect().top;
+            document.body.style.cursor = 'move'; // Cursor ändern
+        }
     });
 
     // Während des Ziehens
@@ -632,61 +635,3 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.style.cursor = 'default'; // Cursor zurücksetzen
     });
 });
-
-
-
-
-/**
- * toggleVarHistory
- * 
- * Beschreibung:
- * Diese Funktion zeigt oder versteckt die Historie (`varHistory`) einer Variablen.
- * Zusätzlich wird der zugehörige Button aktualisiert, indem er eine `active`-Klasse 
- * erhält oder entfernt wird, um den aktuellen Status visuell darzustellen. 
- * Außerdem kann die Größe des `varHistory`-Containers angepasst werden.
- * 
- * Parameter:
- * @param {string} historyId - Die eindeutige ID des `varHistory`-Containers, dessen Sichtbarkeit geändert werden soll.
- * @param {number} [width] - Die Breite des `varHistory`-Containers. Optional.
- * @param {number} [height] - Die Höhe des `varHistory`-Containers. Optional.
- * 
- * Ablauf:
- * 1. Das `varHistory`-Element anhand der ID `{historyId}-varHistory` abrufen.
- * 2. Den Button ermitteln, der die Funktion `toggleVarHistory()` für diesen `historyId` aufruft.
- * 3. Falls das `varHistory`-Element versteckt ist:
- *    - Es sichtbar machen (`display: block`).
- *    - Den Button als `active` markieren.
- *    - Die Größe des Containers ändern, falls `width` und/oder `height` angegeben sind.
- * 4. Falls das `varHistory`-Element sichtbar ist:
- *    - Es verstecken (`display: none`).
- *    - Den Button als `inactive` markieren.
- * 
- * Beispiel:
- * toggleVarHistory("myHistory", 300, 200); // Zeigt oder versteckt die Historie von "myHistory" und setzt die Größe auf 300x200.
- */
-function toggleVarHistory(historyId, width, height) {
-    const historyElement = document.getElementById(historyId + '-varHistory');
-    const button = document.getElementById('toggle-' + historyId);
-
-    if (historyElement.style.display === 'none' || historyElement.style.display === '') {
-        // Element sichtbar machen
-        historyElement.style.display = 'block';
-
-        // Button auf 'active' setzen
-        button.classList.add('active');
-        
-        // Größe anpassen, falls übergeben
-        if (width) {
-            historyElement.style.width = width + 'px';
-        }
-        if (height) {
-            historyElement.style.height = height + 'px';
-        }
-    } else {
-        // Element verstecken
-        historyElement.style.display = 'none';
-
-        // Button auf 'inactive' setzen
-        button.classList.remove('active');
-    }
-}

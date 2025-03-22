@@ -1475,6 +1475,12 @@ echo '</div>'; // Ende des übergeordneten Containers `dump-header`
 
         $indent = str_repeat('', $level);
 
+        if ($level == 1) {
+          $value = _t('value','Wert').': ';  
+        } else {
+            $value = '';             
+        }
+
         // Begrenzung der Rekursionstiefe (vertikale Begrenzung)
         if ( $level > self::getOption('maxDepth') ) {
             return '<span class="dump-null">[...] (max depth (' . self::getOption('maxDepth') . ') reached)</span>';
@@ -1496,25 +1502,25 @@ echo '</div>'; // Ende des übergeordneten Containers `dump-header`
 
         // Formatierung für boolesche Werte
         if (is_bool($var)) {
-            return '<span class="dump-value-caption">'._t('value','Wert').':</span> <span class="'.'dump-line-'.$level. ' dump-bool '. ($var ? 'bool-true' : 'bool-false') .'">' . ($var ? '✔ true' : '✖ false') . '</span>';
+            return '<span class="dump-value-caption">'.$value.'</span> <span class="'.'dump-line-'.$level. ' dump-bool '. ($var ? 'bool-true' : 'bool-false') .'">' . ($var ? '✔ true' : '✖ false') . '</span>';
         }
         // Formatierung für Ganzzahlen
         if (is_int($var)) {
-            return '<span class="dump-value-caption">'._t('value','Wert').':</span> <span class="dump-int">' . $var . '</span>';
+            return '<span class="dump-value-caption">'.$value.'</span> <span class="dump-int">' . $var . '</span>';
         }
         // Formatierung für Fließkommazahlen
         if (is_float($var)) {
-            return '<span class="dump-value-caption">'._t('value','Wert').':</span> <span class="dump-float">' . $var . '</span>';
+            return '<span class="dump-value-caption">'.$value.'</span> <span class="dump-float">' . $var . '</span>';
         }
         // Formatierung für Strings
         if (is_string($var)) {
             return strpos($var, "\n") !== false 
-                ? '<span class="dump-value-caption">'._t('value','Wert').':</span><br> <pre class="dump-string">' . htmlspecialchars($var) . '</pre>' 
-                : '<span class="dump-value-caption">'._t('value','Wert').':</span> <span class="dump-string">"' . htmlspecialchars($var) . '"</span>';
+                ? '<span class="dump-value-caption">'.$value.'</span><br> <pre class="dump-string">' . htmlspecialchars($var) . '</pre>' 
+                : '<span class="dump-value-caption">'.$value.'</span> <span class="dump-string">"' . htmlspecialchars($var) . '"</span>';
         }
         // Formatierung für null
         if (is_null($var)) {
-            return '<span class="dump-value-caption">'._t('value','Wert').':</span> <span class="dump-null">null</span>';
+            return '<span class="dump-value-caption">'.$value.'</span> <span class="dump-null">null</span>';
         }
 
         // Formatierung für Arrays

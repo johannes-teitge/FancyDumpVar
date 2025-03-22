@@ -84,7 +84,13 @@ use FancyDumpVar as FDV;
 
             // Testdaten für Arrays und Objekte
             $testArray = ["name" => "John", "age" => 30, "size" => 1.93, "job" => "Developer", "male" => true, "female" => false ];
-            $testArray2 = ["name" => "John", "age" => 30, "job" => "Developer"];            
+            $testArray2 = ["name" => "John", "age" => 30, "job" => "Developer"];    
+            
+            $intVar = 345;
+            $floatVar = 367.56;
+            $boolVarTrue = true;
+            $boolVarFalse = false;  
+            $nullVar = null;          
 
             // Testklasse mit verschiedenen Sichtbarkeiten für Eigenschaften
             class TestClass {
@@ -130,7 +136,7 @@ use FancyDumpVar as FDV;
 
             // FancyDumpVar Instanz und Beispiel-Dump
             $debugger = new  \FancyDumpVar\FancyDumpVar();
-            $debugger->dump($recursiveData, $testArray, $testArray2, $emptyObject, $testObj, $debugger);
+            $debugger->dump($intVar,$floatVar,$boolVarTrue,$boolVarFalse,$nullVar,$recursiveData, $testArray, $testArray2, $emptyObject, $testObj, $debugger);
 
 			// Sprache setzen
             $debugger->setOption('language', 'de');			
@@ -139,7 +145,7 @@ use FancyDumpVar as FDV;
             $debugger->setOption('Title', 'Example1 Output');	
 			
 			// CSS-File setzen
-            $debugger->setOption('customCssFile', 'monocrom.css');				
+         //   $debugger->setOption('customCssFile', 'monocrom.css');				
 
 			// Daten dumpen
             $debugger->dumpOut();  // Ausgabe der gedumpten Daten

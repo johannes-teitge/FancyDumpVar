@@ -3,7 +3,7 @@
     border: 1px solid #444444;  /* Dunkler Rand für monochromes Design */
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-    background: #2d2d2d; /* Dunkler Hintergrund für den Container */
+    background: #2d2d2d00; /* Dunkler Hintergrund für den Container */
     overflow: hidden;
     margin-bottom: 10px;
     padding: 0;
@@ -11,24 +11,24 @@
 }
 
 /* Stile für unterschiedliche Datentypen */
-.bool-true { color: #888888; } /* Grauton für true */
-.bool-false { color: #888888; } /* Grauton für false */
-.dump-int { color: #999999; } /* Grauton für Integer */
-.dump-float { color: #777777; } /* Dunklerer Grauton für Fließkommazahlen */
-.dump-string { color: #aaaaaa; } /* Hellerer Grauton für Strings */
+.bool-true { color: #b03636; } /* Grauton für true */
+.bool-false { color: #73ab5d; } /* Grauton für false */
+.dump-int { color: #8bb3df; } /* Grauton für Integer */
+.dump-float { color: #8bb3df; } /* Dunklerer Grauton für Fließkommazahlen */
+.dump-string { color: #e39362; } /* Hellerer Grauton für Strings */
 .dump-null { color: #b3b3b3; } /* Grauton für null */
 .dump-array, .dump-object { color: #cccccc; } /* Noch helleres Grau für Arrays/Objekte */
 .dump-key { font-weight: bold; color: #d0d0d0; } /* Etwas helleres Grau für Schlüssel */
 
 /* Stile für Sichtbarkeit von Properties und Methoden */
 .fds_propname { font-weight: bold; margin-left: 5px; color: white; }
-.fds_propname_visibility.public { color: #888888; } /* Grauton für public */
-.fds_propname_visibility.protected { color: #777777; } /* Dunklerer Grauton für protected */
+.fds_propname_visibility.public { color: #c8f3c4; } /* Grauton für public */
+.fds_propname_visibility.protected { color: #e9c1c1; } /* Dunklerer Grauton für protected */
 .fds_propname_visibility.private { color: #666666; } /* Noch dunklerer Grauton für private */
 
-.fds_methodname { font-weight: bold; margin-left: 5px; }
-.fds_method_visibility.public { color: #888888; } /* Grauton für public */
-.fds_method_visibility.protected { color: #777777; } /* Dunklerer Grauton für protected */
+.fds_methodname { font-weight: bold; margin-left: 5px; color: white; }
+.fds_method_visibility.public { color: #c8f3c4; } /* Grauton für public */
+.fds_method_visibility.protected { color: #e9c1c1; } /* Dunklerer Grauton für protected */
 .fds_method_visibility.private { color: #666666; } /* Noch dunklerer Grauton für private */
 
 .fds_method_params { font-style: italic; color: #b3b3b3; } /* Grauton für Parameter */
@@ -47,11 +47,13 @@
     margin: 0;
     font-size: 0.95rem !important;
     line-height: 1.1rem !important;
+    max-height: 650px;
+    overflow-y: auto;
 }
 .dump-content {
     margin-left: 12px;
     padding-left: 5px;
-    border-left: 2px solid rgba(50, 50, 50, 0.5);
+    border-left: 2px solid rgba(215, 215, 215, 0.5);
 }
 
 .dump-content-level-1 {
@@ -124,6 +126,7 @@
 
 .varName {
     font-weight: bold;
+    color: white;
 }
 
 .varTimeInfo {
@@ -240,7 +243,7 @@ mark.current {
     align-items: center;
     justify-content: space-between;
     padding: 4px 15px;
-    background: linear-gradient(90deg, #444444, #555555);
+    background: linear-gradient(90deg, #444444a0, #55555584);
     color: white;
     font-weight: bold;
     cursor: pointer;
@@ -251,6 +254,7 @@ mark.current {
 }
 
 .dump-title-bar.open {
+    background: linear-gradient(90deg, #444444, #555555);    
 }
 
 /* Titel (kleiner gemacht für bessere Proportionen) */
@@ -417,7 +421,7 @@ mark.current {
 }
 
 .dump-value-caption {
-    color: rgb(0, 85, 164); 
+    color: rgb(234, 234, 234); 
     font-weight: bold; 
   }
   
@@ -428,8 +432,8 @@ mark.current {
       gap: 14px; /* Abstand zwischen den span-Elementen */    
       display: inline-flex;
       font-size: 0.8em;
-      background-color: rgba(212, 212, 212, 0.182);
-      color:rgb(83, 83, 83);
+      background-color: rgba(212, 212, 212, 0.876);
+      color:rgb(78, 78, 78);
       border-radius:  0px; 
       padding: 2px;  
       transition: all 0.3s ease-in-out;
@@ -476,18 +480,18 @@ mark.current {
       border: none;                   /* Optional: Entfernt den Button-Rand */
       padding: 0;                     /* Optional: Entfernt die Polsterung des Buttons */
       cursor: pointer;                /* Zeigt den Hand-Cursor an */
-      color: #a0a0a077;  /* Setzt die Farbe auf Blau */    
+      color: #b0b0b077;  /* Setzt die Farbe auf Blau */    
       width: 18px;
       height: 18px;
   }
   
   .info-icon-btn:hover,.history-icon-btn:hover {
-      color: rgb(0, 72, 140);     
+      color: rgb(221, 221, 221);     
   }
   
   /* Stil für den aktiven Zustand */
   .info-icon-btn.active, .history-icon-btn.active {
-      color: rgb(0, 72, 140);   
+    color: rgb(221, 221, 221);    
       transform: scale(1.1) rotate(720deg);  /* Kleiner & zurückdrehen */
       transition: transform 0.4s ease-in-out;    
   }
@@ -724,37 +728,44 @@ mark.current {
   
   
   
-  /* Grundlegende Wrapper-Stile */
-  .fdv-wrapper {
-      position: fixed;
-      top: 50px;
-      left: 50px;
-      width: 80%;
-      height: 40px;
-      background-color: rgba(255, 255, 255, 0);
-      padding: 10px;
-      z-index: 9999;
-      cursor: move; /* Zeigt den Pfeil für vertikales Ziehen */
-  }
-  
-  /* Hinzufügen eines Anfassers */
-  .fdv-wrapper:before {
-      content: '';
-      position: absolute;
-      top: -4px; /* Positionierung des Anfassers */
-      left: 50%;
-      transform: translateX(-50%); /* Zentriert den Anfasser */
-      width: 200px;
-      height: 10px;
-      background-color: rgba(70, 90, 109, 0.119);
-      border-radius: 5px; /* Rundung für einen weichen Look */
-      transition: background-color 0.5s ease-in-out; /* Übergang für die Hintergrundfarbe */
-  }
-  
-  /* Optional: Hover-Effekt für den Anfasser */
-  .fdv-wrapper:hover:before {
-      background-color: rgb(70, 90, 109);    
-  }
+
+/* Optional: Den Cursor auf dem Rest der Seite wieder auf Standard setzen */
+body, .dump-container {
+    cursor: default;
+}
+
+
+/* Grundlegende Wrapper-Stile */
+.fdv-wrapper {
+    position: fixed;
+    top: 50px;
+    left: 50px;
+    width: 80%;
+    height: 40px;
+    background-color: rgba(255, 255, 255, 0);
+    padding: 10px;
+    z-index: 9999;
+    cursor: move; /* Zeigt den Pfeil für vertikales Ziehen */
+}
+
+/* Hinzufügen eines oberen Anfassers */
+.fdv-wrapper:before {
+    content: '';
+    position: absolute;
+    top: -4px; /* Positionierung des oberen Anfassers */
+    left: 50%;
+    transform: translateX(-50%); /* Zentriert den Anfasser */
+    width: 200px;
+    height: 10px;
+    background-color: #4444441f;
+    border-radius: 5px; /* Rundung für einen weichen Look */
+    transition: background-color 0.5s ease-in-out; /* Übergang für die Hintergrundfarbe */
+}
+
+/* Optional: Hover-Effekt für den oberen Anfasser */
+.fdv-wrapper:hover:before {
+    background-color: #444;    
+}
   
   
   
@@ -799,4 +810,12 @@ mark.current {
   
   .class-arrow,.obj-dumpbracket {
     color:rgba(213, 213, 213, 0.655);
+  }
+
+  .object-empty {
+    color:rgba(238, 238, 238, 0.891);    
+  }
+
+  .object-methods {
+    color:rgba(238, 238, 238, 0.891);     
   }
