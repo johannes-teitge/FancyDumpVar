@@ -17,7 +17,7 @@
 .bool-false { color:rgba(166, 8, 8, 0.747); font-weight: bold; }        
 .dump-int { color: rgba(72, 158, 18, 0.78); font-weight: bold; }
 .dump-float { color: #006e1b; font-weight: bold; }
-.dump-string { color: #0061b6; font-weight: bold; }
+.dump-string { color: #0098b6; font-weight: bold; }
 .dump-null { color: #7f8c8d; font-weight: bold; }
 .dump-array, .dump-object { color: #2c3e50; font-weight: bold; cursor: pointer; }
 .dump-key { color: #003f68cd; }
@@ -78,6 +78,14 @@
 
 
 .var-wrapper {
+    /*  display: inline-block; */
+    max-width: 100%; /* optional: begrenzt Breite im Container */
+    overflow-x: auto; /* aktiviert horizontales Scrollen bei Bedarf */
+    /* white-space: nowrap; */ /* Inhalt bleibt in einer Zeile, wenn nötig */
+
+    word-break: break-all; /* bricht auch mitten im Wort */
+    white-space: pre-wrap; /* erhält Formatierung und bricht Zeilen */    
+
     margin-bottom: 10px;
     padding: 0 0;
     background-color: white;
@@ -86,7 +94,8 @@
     border-radius: 8px;     
     padding: 4px 4px 4px 6px; 
     transition: all 0.3s ease-in-out;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.13);                
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.13);   
+    padding-right: 8px;             
 }        
 
 .var-wrapper:hover {
@@ -779,38 +788,68 @@ body, .dump-container {
 }
 
 
-/* Grundlegende Wrapper-Stile */
+/* Standard-Cursor für den Body */
+body, .dump-container {
+    cursor: default;
+}
+
+/* Haupt-Wrapper */
 .fdv-wrapper {
     position: fixed;
     top: 50px;
     left: 50px;
     width: 80%;
-    height: 40px;
-    background-color: rgba(255, 255, 255, 0);
-    padding: 10px;
+    max-width: 100%;
+    min-width: 200px;
+    background-color: #ffffff00;
+    padding-bottom: 10px;
+    border: 0;
     z-index: 9999;
-    cursor: move; /* Zeigt den Pfeil für vertikales Ziehen */
+    resize: none; /* wir kontrollieren die Größe manuell */
+    overflow: hidden;
+    border-radius: 6px;
 }
 
-/* Hinzufügen eines oberen Anfassers */
-.fdv-wrapper:before {
-    content: '';
-    position: absolute;
-    top: -4px; /* Positionierung des oberen Anfassers */
-    left: 50%;
-    transform: translateX(-50%); /* Zentriert den Anfasser */
-    width: 200px;
-    height: 10px;
-    background-color: rgba(70, 90, 109, 0.119);
-    border-radius: 5px; /* Rundung für einen weichen Look */
-    transition: background-color 0.5s ease-in-out; /* Übergang für die Hintergrundfarbe */
+/* Kopfbereich mit Drag-Handle und Buttons */
+.fdv-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #637b8e27;
+    border-radius: 12px;
+    padding: 0px 10px;
+    border-bottom: 0px solid #ccc;
+    cursor: grab;
+    user-select: none;
+    font-family: sans-serif;
+    margin:auto;
+    width: 30%;
+    text-align: center;
+    margin-bottom: 2px;
 }
 
-/* Optional: Hover-Effekt für den oberen Anfasser */
-.fdv-wrapper:hover:before {
-    background-color: rgb(70, 90, 109);    
+/* Drag-Icon */
+.fdv-drag-handle {
+    font-size: 12px;
+    cursor: grab;
 }
-  
+
+/* Plus-/Minus-Buttons */
+.fdv-controls button {
+    border: none;
+    background: #ffffff00;
+    padding: 0 4px;
+    margin-left: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.2s ease-in-out;
+}
+
+.fdv-controls button:hover {
+    background: #99999988;
+}
+
 
 
 
@@ -851,4 +890,93 @@ body, .dump-container {
     font-size: 1.5em;
     cursor: pointer;
     margin-right: 10px; /* Abstand zum nächsten Element */
+}
+
+
+/* Original
+#fdv-phpinfo body { background-color: #fff; color: #222; font-family: sans-serif; }
+#fdv-phpinfo pre { margin: 0; font-family: monospace; }
+#fdv-phpinfo a:link { color: #009; text-decoration: none; background-color: #fff; }
+#fdv-phpinfo a:hover { text-decoration: underline; }
+#fdv-phpinfo table { border-collapse: collapse; border: 0; width: 934px; box-shadow: 1px 2px 3px rgba(0, 0, 0, 0.2); }
+#fdv-phpinfo .center { text-align: center; }
+#fdv-phpinfo .center table { margin: 1em auto; text-align: left; }
+#fdv-phpinfo .center th { text-align: center !important; }
+#fdv-phpinfo td,
+#fdv-phpinfo th { border: 1px solid #666; font-size: 75%; vertical-align: baseline; padding: 4px 5px; }
+#fdv-phpinfo th { position: sticky; top: 0; background: inherit; }
+#fdv-phpinfo h1 { font-size: 150%; }
+#fdv-phpinfo h2 { font-size: 125%; }
+#fdv-phpinfo h2 a:link,
+#fdv-phpinfo h2 a:visited { color: inherit; background: inherit; }
+#fdv-phpinfo .p { text-align: left; }
+#fdv-phpinfo .e { background-color: #ccf; width: 300px; font-weight: bold; }
+#fdv-phpinfo .h { background-color: #99c; font-weight: bold; }
+#fdv-phpinfo .v { background-color: #ddd; max-width: 300px; overflow-x: auto; word-wrap: break-word; }
+#fdv-phpinfo .v i { color: #999; }
+#fdv-phpinfo img { float: right; border: 0; }
+#fdv-phpinfo hr { width: 934px; background-color: #ccc; border: 0; height: 1px; }
+
+#fdv-phpinfo :root {
+  --php-dark-grey: #333;
+  --php-dark-blue: #4F5B93;
+  --php-medium-blue: #8892BF;
+  --php-light-blue: #E2E4EF;
+  --php-accent-purple: #793862;
+}
+
+@media (prefers-color-scheme: dark) {
+  #fdv-phpinfo body { background: var(--php-dark-grey); color: var(--php-light-blue); }
+  #fdv-phpinfo .h td,
+  #fdv-phpinfo td.e,
+  #fdv-phpinfo th { border-color: #606A90; }
+  #fdv-phpinfo td { border-color: #505153; }
+  #fdv-phpinfo .e { background-color: #404A77; }
+  #fdv-phpinfo .h { background-color: var(--php-dark-blue); }
+  #fdv-phpinfo .v { background-color: var(--php-dark-grey); }
+  #fdv-phpinfo hr { background-color: #505153; }
+}
+  */
+
+  #fdv-phpinfo body { background-color: #fff; color: #222; font-family: sans-serif; }
+#fdv-phpinfo pre { margin: 0; font-family: monospace; }
+#fdv-phpinfo a:link { color: rgb(0, 85, 164); text-decoration: none; background-color: #fff; }
+#fdv-phpinfo a:hover { text-decoration: underline; }
+#fdv-phpinfo table { border-collapse: collapse; border: 0; width: 934px; box-shadow: 1px 2px 3px rgba(0, 0, 0, 0.2); }
+#fdv-phpinfo .center { text-align: center; }
+#fdv-phpinfo .center table { margin: 1em auto; text-align: left; }
+#fdv-phpinfo .center th { text-align: center !important; }
+#fdv-phpinfo td,
+#fdv-phpinfo th { border: 1px solid #666; font-size: 75%; vertical-align: baseline; padding: 4px 5px; }
+#fdv-phpinfo th { position: sticky; top: 0; background: inherit; }
+#fdv-phpinfo h1 { font-size: 150%; }
+#fdv-phpinfo h2 { font-size: 125%; }
+#fdv-phpinfo h2 a:link,
+#fdv-phpinfo h2 a:visited { color: inherit; background: inherit; }
+#fdv-phpinfo .p { text-align: left; }
+#fdv-phpinfo .e { background-color: rgba(0, 85, 164, 0.102); width: 300px; font-weight: bold; }
+#fdv-phpinfo .h { background-color: rgba(0, 85, 164, 0.264); font-weight: bold; }
+#fdv-phpinfo .v { background-color: #dddddd33; max-width: 300px; overflow-x: auto; word-wrap: break-word; }
+#fdv-phpinfo .v i { color: #999; }
+#fdv-phpinfo img { float: right; border: 0; }
+#fdv-phpinfo hr { width: 934px; background-color: #ccc; border: 0; height: 1px; }
+
+#fdv-phpinfo :root {
+  --php-dark-grey: #333;
+  --php-dark-blue: #4F5B93;
+  --php-medium-blue: #8892BF;
+  --php-light-blue: #E2E4EF;
+  --php-accent-purple: #793862;
+}
+
+@media (prefers-color-scheme: dark) {
+  #fdv-phpinfo body { background: var(--php-dark-grey); color: var(--php-light-blue); }
+  #fdv-phpinfo .h td,
+  #fdv-phpinfo td.e,
+  #fdv-phpinfo th { border-color: #606A90; }
+  #fdv-phpinfo td { border-color: #505153; }
+  #fdv-phpinfo .e { background-color: #404A77; }
+  #fdv-phpinfo .h { background-color: var(--php-dark-blue); }
+  #fdv-phpinfo .v { background-color: var(--php-dark-grey); }
+  #fdv-phpinfo hr { background-color: #505153; }
 }

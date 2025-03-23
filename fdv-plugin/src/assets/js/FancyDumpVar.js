@@ -577,61 +577,85 @@ function toggleVarHistory(historyId) {
 
  
 
+document.addEventListener('DOMContentLoaded', function () {
+    const wrapper = document.querySelector('.fdv-wrapper');
+    const header = document.querySelector('.fdv-header');
+    const plus = document.querySelector('.fdv-resize-plus');
+    const minus = document.querySelector('.fdv-resize-minus');
 
-/**
- * toggleVarHistory
- * 
- * Beschreibung:
- * Diese Funktion zeigt oder versteckt die Historie (`varHistory`) einer Variablen.
- * Zusätzlich wird der zugehörige Button aktualisiert, indem er eine `active`-Klasse 
- * erhält oder entfernt wird, um den aktuellen Status visuell darzustellen.
- * 
- * Parameter:
- * @param {string} historyId - Die eindeutige ID des `varHistory`-Containers, dessen Sichtbarkeit geändert werden soll.
- * 
- * Ablauf:
- * 1. Das `varHistory`-Element anhand der ID `{historyId}-varHistory` abrufen.
- * 2. Den Button ermitteln, der die Funktion `toggleVarHistory()` für diesen `historyId` aufruft.
- * 3. Falls das `varHistory`-Element versteckt ist:
- *    - Es sichtbar machen (`display: block`).
- *    - Den Button als `active` markieren.
- * 4. Falls das `varHistory`-Element sichtbar ist:
- *    - Es verstecken (`display: none`).
- *    - Den Button als `inactive` markieren.
- * 
- * Beispiel:
- * toggleVarHistory("myHistory"); // Zeigt oder versteckt die Historie von "myHistory".
- */
-document.addEventListener('DOMContentLoaded', function() {
-    const wrapper = document.querySelector('.fdv-wrapper'); // Wrapper anhand der Klasse auswählen
+    const minWidth = 280;
+    const maxWidth = 1640;
 
+    // 🧠 Werte aus localStorage laden oder sinnvolle Defaults setzen
+    const savedWidth = localStorage.getItem('fdvWrapperWidth');
+    const savedTop = localStorage.getItem('fdvWrapperTop');
+    const savedLeft = localStorage.getItem('fdvWrapperLeft');
+
+    if (savedWidth) {
+        wrapper.style.width = savedWidth;
+    }
+
+    if (savedTop) {
+        wrapper.style.top = savedTop;
+    } else {
+        wrapper.style.top = '80px';
+        localStorage.setItem('fdvWrapperTop', '80px');
+    }
+
+    if (savedLeft) {
+        wrapper.style.left = savedLeft;
+    } else {
+        wrapper.style.left = '80px';
+        localStorage.setItem('fdvWrapperLeft', '80px');
+    }
+
+    // 📦 Drag-Handling über den Header
     let isDragging = false;
-    let offsetX, offsetY;
+    let offsetX = 0;
+    let offsetY = 0;
 
-    // Beim Start des Ziehens
-    wrapper.addEventListener('mousedown', function(e) {
-        // Verhindern, dass das Event auf den inneren Elementen ausgelöst wird
-        if (e.target === wrapper) {
-            isDragging = true;
-            offsetX = e.clientX - wrapper.getBoundingClientRect().left;
-            offsetY = e.clientY - wrapper.getBoundingClientRect().top;
-            document.body.style.cursor = 'move'; // Cursor ändern
-        }
+    header.addEventListener('mousedown', function (e) {
+        isDragging = true;
+        offsetX = e.clientX - wrapper.getBoundingClientRect().left;
+        offsetY = e.clientY - wrapper.getBoundingClientRect().top;
+        document.body.style.cursor = 'move';
     });
 
-    // Während des Ziehens
-    document.addEventListener('mousemove', function(e) {
+    document.addEventListener('mousemove', function (e) {
         if (isDragging) {
-            const newX = e.clientX - offsetX;
-            const newY = e.clientY - offsetY;
-            wrapper.style.left = newX + 'px';
-            wrapper.style.top = newY + 'px';
+            const newLeft = e.clientX - offsetX;
+            const newTop = Math.max(50, e.clientY - offsetY); // 👉 top min. 50px
+            wrapper.style.left = newLeft + 'px';
+            wrapper.style.top = newTop + 'px';
+
+            // 💾 Position speichern
+            localStorage.setItem('fdvWrapperLeft', newLeft + 'px');
+            localStorage.setItem('fdvWrapperTop', newTop + 'px');
         }
     });
 
-    // Beim Loslassen des Ziehens
-    document.addEventListener('mouseup', function() {
+    document.addEventListener('mouseup', function () {
         isDragging = false;
-        document.body.style.cursor = 'default'; // Cursor zurücksetzen
+        document.body.style.cursor = 'default';
+    });
+
+    // ➕ Breite erhöhen
+    plus.addEventListener('click', () => {
+        const newWidth = wrapper.offsetWidth + 50;
+        if (newWidth <= maxWidth) {
+            const widthValue = newWidth + 'px';
+            wrapper.style.width = widthValue;
+            localStorage.setItem('fdvWrapperWidth', widthValue);
+        }
+    });
+
+    // ➖ Breite verringern
+    minus.addEventListener('click', () => {
+        const newWidth = wrapper.offsetWidth - 50;
+        if (newWidth >= minWidth) {
+            const widthValue = newWidth + 'px';
+            wrapper.style.width = widthValue;
+            localStorage.setItem('fdvWrapperWidth', widthValue);
+        }
     });
 });

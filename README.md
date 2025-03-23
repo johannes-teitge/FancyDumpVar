@@ -71,6 +71,42 @@ FDV::dumpOut();
 
 ---
 
+## 🔧 Erweiterte Debugging-Features
+
+FancyDumpVar bietet über die klassische `dump()`-Ausgabe hinaus zahlreiche Komfortfunktionen für effizientes Debugging:
+
+- 👡 **Drag & Drop-Wrapper**  
+  Der Debug-Wrapper lässt sich über den Header bequem verschieben.
+
+- 📏 **Größenverstellung (±)**  
+  Mit den integrierten Buttons kann die Breite des Wrappers angepasst werden (zwischen 280px und 1640px).
+
+- 📏 **Position & Größe merken**  
+  Die aktuelle Position (top/left) und Breite des Wrappers werden automatisch im `localStorage` gespeichert – beim nächsten Laden wird der letzte Zustand wiederhergestellt.
+
+- 📂 **Versionierung von Variablen**  
+  FancyDumpVar erkennt, wenn Variablen mehrfach gedumpt werden, und speichert deren *Versionsverlauf* inkl. Zeitstempel.
+
+- 🕵️‍♂️ **Objekt-Inspektion mit Reflection**  
+  Für Objekte werden Methoden, Properties (mit Sichtbarkeit), dynamische Eigenschaften, Interfaces, Traits und Elternklassen übersichtlich dargestellt.
+
+- 🕰️ **Stoppuhr & Zeitmessung**  
+  Optional lassen sich Ausführungszeiten messen und als `Runtime Info` im Dump einblenden.
+
+- 📚 **Infotexte & Marker**  
+  Per `addInfoText()` können zusätzliche Hinweise, Statusmeldungen oder Fehler visuell hervorgehoben werden.
+
+- 🔍 **Erweiterte Suche im Dump**  
+  Mit Whole-Word- und Case-Sensitive-Toggle, inklusive Icon-basierten Buttons zur Aktivierung.
+
+- 🎨 **Custom Styling & Templates**  
+  Eigene CSS-Dateien können eingebunden werden (`customCssFile`) – z. B. für helle oder dunkle Themes.
+
+- 🌐 **Mehrsprachigkeit**  
+  Übersetzungen über JSON/PHP-Dateien, Auswahl per `FDV::setOption('language', 'de')`.
+
+---
+
 ## ⚙️ Anpassung & Konfiguration
 
 FancyDumpVar erlaubt umfangreiche Anpassungen:

@@ -6,8 +6,8 @@ namespace FancyDumpVar;
  *
  * Eine Utility-Klasse zur eleganten Ausgabe und Darstellung von Variablen.
  *
- * Version: 2.6.0
- * Datum: 2025-03-23
+ * Version: 2.5.8
+ * Datum: 2025-03-19
  *
  * Copyright (C) 2025 Johannes Teitge <johannes@teitge.de>
  *
@@ -173,6 +173,8 @@ class Stopwatch {
 
 
 
+
+
 class FancyDumpVar {
 
     // Stack zum Speichern der gedumpten Variablen
@@ -289,7 +291,6 @@ class FancyDumpVar {
 		'dumpWrapper' => true,   // Flag, um den Wrapper zu aktivieren
 		// 'dumpWrapperStyle' => 'border: 2px solid #ccc; padding: 10px;', // Standard CSS-Stil für den Wrapper
 		'dumpWrapperStyle' => '', // Standard CSS-Stil für den Wrapper
-        'dumpContainerMaxHeight' => '',
 		
     ];
 
@@ -329,44 +330,6 @@ class FancyDumpVar {
     }    
 
 
-
-    /**
-     * Gibt dynamisches CSS für einen oder mehrere Selektoren aus.
-     *
-     * @param string|array $selectors Ein einzelner oder mehrere CSS-Selektoren ('.class', ['.a', '.b'])
-     * @param array $rules Assoziatives Array mit CSS-Regeln (Eigenschaft => Wert)
-     * @param bool $important Wenn true, wird jeder Wert mit !important ergänzt
-     */
-    public static function style($selectors, array $rules, bool $important = false): void {
-        // Selektoren normalisieren
-        if (is_string($selectors)) {
-            $selectors = [$selectors];
-        }
-
-        // Sicherheitscheck
-        if (empty($selectors) || empty($rules)) {
-            return;
-        }
-
-        $output = "<style>\n";
-
-        foreach ($selectors as $selector) {
-            $output .= htmlspecialchars($selector) . " {\n";
-
-            foreach ($rules as $prop => $val) {
-                if (!is_null($val) && $val !== '') {
-                    $value = htmlspecialchars($val) . ($important ? ' !important' : '');
-                    $output .= '    ' . htmlspecialchars($prop) . ': ' . $value . ";\n";
-                }
-            }
-
-            $output .= "}\n";
-        }
-
-        $output .= "</style>\n";
-
-        echo $output;
-    }
 
 
     /**
@@ -833,7 +796,7 @@ public static function translate($key, $default = null, $placeholders = []) {
 
        //     echo trim($varNames[$index]).'<br>';
 
-            $varName = isset($varNames[$index]) ? trim($varNames[$index]) : 'Var_' . (count(self::$stack) + 1);
+//            $varName = isset($varNames[$index]) ? trim($varNames[$index]) : 'Variable_' . (count(self::$stack) + 1);
         //    $varName = preg_replace('/[^a-zA-Z0-9_]/', '_', $varName); // Entferne Sonderzeichen
 
 
@@ -1120,7 +1083,6 @@ public static function dump_(...$vars) {
                 $cssFilePath = $_SERVER['DOCUMENT_ROOT'] . '/src/assets/css/FancyDumpVar.css';  // Standarddatei
             }
 
-
             // Erstelle die absoluten Pfade zu den JS-Dateien
             $jsFile1Path = $_SERVER['DOCUMENT_ROOT'] . '/src/assets/js/FancyDumpVar.js';
             $jsFile2Path = $_SERVER['DOCUMENT_ROOT'] . '/src/assets/js/mark.js';
@@ -1145,12 +1107,6 @@ public static function dump_(...$vars) {
 
             self::$assetsLoaded = true;
         }
-
-        // Dynamic Styles setzen
-        self::style('.dump-container', [
-            'max-height' => self::getOption('dumpContainerMaxHeight') ?: '680px',
-        ]);
-
 
 
 		// Prüfen, ob die Option 'dumpWrapper' aktiviert ist
@@ -1199,8 +1155,8 @@ public static function dump_(...$vars) {
 echo '<div class="dump-title-bar" id="title-bar-dump-' . $ID . '" onclick="toggleDump(\'' . $dumpId . '\')">';
     echo '<span class="dump-toggler-symbol" id="toggle-' . $dumpId . '">+</span>';  // Pluszeichen ganz links
     echo '<div class="dump-info">';  // Container für die Infos
-        echo '<span class="variable-count">'._t('variables','Variables').': ' . $variableCount . '</span>';
-        echo '<span class="element-count">'._t('elements','Elements').': ' . $elementCount . '</span>';
+        echo '<span class="variable-count">Variablen: ' . $variableCount . '</span>';
+        echo '<span class="element-count">Elemente: ' . $elementCount . '</span>';
     echo '</div>';
     echo '<span class="dump-title">' . self::getOption('Title') . '</span>'; // Optionaler Titel, rechtsbündig
 echo '</div>';
@@ -1334,7 +1290,7 @@ echo '</div>'; // Ende des übergeordneten Containers `dump-header`
                 echo '</div>';
 
 
-//                echo self::formatVar($entry['data'], $dumpId . '-var' . $index, 1);     
+                echo self::formatVar($entry['data'], $dumpId . '-var' . $index, 1);     
                 
                     // Zähler für den Index der Schleife
                     $date_format = self::getOption('DateInfoFormat');
@@ -1422,7 +1378,6 @@ echo '</div>'; // Ende des übergeordneten Containers `dump-header`
                                          
 
 
-                echo self::formatVar($entry['data'], $dumpId . '-var' . $index, 1);   
                 
                 echo '</div>';
 
@@ -1583,50 +1538,22 @@ echo '</div>'; // Ende des übergeordneten Containers `dump-header`
             return '<span class="dump-value-caption">'.$value.'</span> <span class="dump-null">null</span>';
         }
 
+        // Formatierung für Arrays
+        if (is_array($var)) {
+            $sortPropertiesAndMethods = self::getOption('sortPropertiesAndMethods');
+            if ($sortPropertiesAndMethods) {
+                ksort($var);
+            }
+            $output = '<div class="dump-toggler-wrapper" >' . $indent . '<span class="dump-toggler" id="btn-' . $id . '" onclick="toggleElement(\'' . $id . '\')">[+]</span>';
+            $output .= '<span class="dump-array" onclick="toggleElement(\'' . $id . '\')">Array (' . count($var) . ')</span>';
 
-		// Formatierung für Arrays
-		if (is_array($var)) {
-			$sortPropertiesAndMethods = self::getOption('sortPropertiesAndMethods');
-			if ($sortPropertiesAndMethods) {
-				ksort($var);
-			}
-
-			$output  = '<div class="dump-toggler-wrapper">' . $indent;
-			$output .= '<span class="dump-toggler" id="btn-' . $id . '" onclick="toggleElement(\'' . $id . '\')">[+]</span>';
-			$output .= '<span class="dump-array" onclick="toggleElement(\'' . $id . '\')">Array (' . count($var) . ')</span>';
-			$output .= '<div class="dump-content-level-' . $level . ' dump-content hidden" id="' . $id . '">';
-
-			foreach ($var as $key => $value) {
-				$isHtml = false;
-
-				// Sonderkennzeichen: "::html" am Ende des Keys erlaubt Roh-HTML-Ausgabe
-				if (is_string($key) && substr($key, -6) === '::html') {
-					$isHtml = true;
-					$key = substr($key, 0, -6); // "::html" entfernen
-				}
-
-				$safeKey = htmlspecialchars($key);
-				$childId = $id . '-' . preg_replace('/[^a-zA-Z0-9_\-]/', '_', $safeKey);
-
-				$output .= '<div class="dump-array-item">' . $indent;
-				$output .= '<span class="dump-key"><span class="dumpbracket">[</span>' . $safeKey . '<span class="dumpbracket">]</span></span>';
-				$output .= '<span class="class-arrow"> => </span>';
-
-				if ($isHtml && is_string($value)) {
-					// Rohes HTML anzeigen (z.B. phpinfo)
-					$output .= '<div class="dump-raw-html">' . $value . '</div>';
-				} else {
-					// Normaler Dump
-					$output .= self::formatVar($value, $childId, $level + 1);
-				}
-
-				$output .= '</div>';
-			}
-
-			$output .= '</div></div>';
-			return $output;
-		}
-
+            $output .= '<div class="dump-content-level-'.$level.' dump-content hidden" id="' . $id . '">';
+            foreach ($var as $key => $value) {
+                $output .= '<div class="dump-array-item">' . $indent . '<span class="dump-key"><span class="dumpbracket">[</span>' . htmlspecialchars($key) . '<span class="dumpbracket">]</span></span><span class="class-arrow"> => </span>' . self::formatVar($value, $id . '-' . $key, $level + 1) . '</div>';
+            }
+            $output .= '</div></div>';
+            return $output;
+        }
 
         // Formatierung für Callables / Funktionen
         if (is_callable($var)) {

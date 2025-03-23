@@ -8,4 +8,6 @@ return [
     "element_count" => "Element Count",
 	"more_infos" => "More Infos",
     "value" => "Value",
+    "variables" => "Variables",	
+    "elements" => "Elements",		
 ];
